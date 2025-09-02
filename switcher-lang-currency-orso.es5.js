@@ -1,38 +1,13 @@
 ﻿/* 
- Language & Currency Switcher (server-driven, accessibility-first)
- ------------------------------------------------------------------
+ Language & Currency Switcher - Jazykový a menový prepínač
+ ----------------------------------------------------------
+ Responzívny jazykový a menový prepínač s podporou accessibility
+ 
  - Language: Vždy zobrazený, generované <a href> linky
  - Currency: UI prepínač s konfigurovateľným povolením zmeny
- - options:
-     language        // Click events
-       $(document).on(`click.switch-${type}`, function (e) {
-           if (!$(e.target).closest($root).length && $root.hasClass('show-options')) {
-               close();
-           }
-       });
-
-       $(document).on(`keydown.switch-${type}`, function (e) {
-           if (e.key === 'Escape' && $root.hasClass('show-options')) {
-               close();
-           }
-       });
-
-       // Responzívne správanie - vyčisti overlay pri zmene na desktop
-       let mobileMediaQuery = window.matchMedia('(max-width: 768px)');
-       function handleMobileChange(mq) {
-           log('Zmena zobrazenia na:', mq.matches ? 'mobilné' : 'desktop');
-           if (!mq.matches) {
-               // Pri prepnutí na desktop odstráň overlay
-               removeMobileOverlay();
-           }
-       }
-       
-       if (mobileMediaQuery.addListener) {
-           mobileMediaQuery.addListener(handleMobileChange);
-       } else if (mobileMediaQuery.addEventListener) {
-           mobileMediaQuery.addEventListener('change', handleMobileChange);
-       }
-   }ané z <html lang>, fallback)
+ 
+ @options:
+     language: string (aktuálny jazyk - čítané z <html lang>, fallback)
      currency: string (pre currency switcher)
      languages: string[] v tvare "kod|Label" 
      allowCurrencyChange: boolean (default true) – či zobraziť currency switcher
