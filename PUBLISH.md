@@ -20,17 +20,18 @@ Tento súbor obsahuje pokyny pre publikovanie projektu na GitHub.
    ```bash
    git init
    git add .
-   git commit -m "Prvé vydanie: Jazykový a menový prepínač v1.0.0"
+   git commit -m "Prvé vydanie: Switcher: Language & Currency v1.0.0"
    ```
 
 2. **Vytvor GitHub repozitár**
    - Choď na GitHub.com
-   - Vytvor nový repozitár s názvom `jazykovy-menovy-prepinac`
+   - Vytvor nový repozitár s názvom `switcher-language-currency`
+   - Názov repozitára: "Switcher: Language & Currency v1.0.0"
    - Nepridávaj README, .gitignore ani licenciu (už existujú)
 
 3. **Pripoj lokálny repozitár k GitHub**
    ```bash
-   git remote add origin https://github.com/[username]/jazykovy-menovy-prepinac.git
+   git remote add origin https://github.com/[username]/switcher-language-currency.git
    git branch -M main
    git push -u origin main
    ```

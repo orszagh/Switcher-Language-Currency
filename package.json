@@ -1,7 +1,7 @@
 {
-  "name": "jazykovy-menovy-prepinac",
+  "name": "switcher-language-currency",
   "version": "1.0.0",
-  "description": "Responzívny jazykový a menový prepínač s podporou accessibility a mobilného dizajnu",
+  "description": "Switcher: Language & Currency v1.0.0 - Responzívny jazykový a menový prepínač s podporou accessibility a mobilného dizajnu",
   "main": "dist/switcher-lang-currency-orso.js",
   "style": "dist/switcher-lang-currency-orso.css",
   "files": [
@@ -36,13 +36,13 @@
     "url": "https://github.com/orszagh"
   },
   "license": "MIT",
-  "homepage": "https://github.com/orszagh/jazykovy-menovy-prepinac#readme",
+  "homepage": "https://github.com/orszagh/switcher-language-currency#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/orszagh/jazykovy-menovy-prepinac.git"
+    "url": "git+https://github.com/orszagh/switcher-language-currency.git"
   },
   "bugs": {
-    "url": "https://github.com/orszagh/jazykovy-menovy-prepinac/issues"
+    "url": "https://github.com/orszagh/switcher-language-currency/issues"
   },
   "dependencies": {},
   "peerDependencies": {

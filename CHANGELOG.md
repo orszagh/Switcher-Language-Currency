@@ -8,7 +8,7 @@ a tento projekt dodržiava [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [1.0.0] - 2025-09-02
 
 ### Pridané
-- Prvé vydanie Jazykového a Menového Prepínača
+- Prvé vydanie Switcher: Language & Currency v1.0.0
 - Mobilný responzívny dizajn s centrovaným dropdown na mobilných zariadeniach
 - Plná podpora accessibility s ARIA atribútmi a klávesovou navigáciou
 - Kompatibilita s modálnymi dialógmi a správne spracovanie ESC klávesy

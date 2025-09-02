@@ -1,4 +1,4 @@
-# Jazykový a Menový Prepínač
+# Switcher: Language & Currency v1.0.0
 
 Responzívny jQuery plugin pre prepínanie jazykov a mien s plnou podporou accessibility.
 
