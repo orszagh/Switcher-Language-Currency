@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test modálne okno - Language Currency Switcher</title>
+    <link rel="stylesheet" href="switcher-lang-currency-orso.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        /* Simulácia Bootstrap modálneho okna */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1050;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-dialog {
+            background: white;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa;
+        }
+        
+        .modal-header.modal-header-v2 {
+            display: flex;
+            padding: 0 2rem;
+            background: #fff;
+        }
+        
+        .modal-header.modal-header-v2 .switch {
+            margin-left: auto;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 0.25rem;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .test-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .lc-switches {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .modal-content {
+            height: 400px;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-dialog {
+                width: 95%;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h3>🪟 Test modálneho okna</h3>
+        <p><strong>Desktop test:</strong> Otvorte modálne okno a skúste otvoriť dropdown. Stlačenie ESC by malo zatvoriť iba dropdown, nie celé modálne okno.</p>
+        <p><strong>Mobilný test:</strong> Zmenšite okno na mobilnú veľkosť a testujte overlay klik - dropdown by sa mal zatvoriť klikom na tmavé pozadie.</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="openModal()">Otvoriť modálne okno</button>
+
+    <!-- Modálne okno -->
+    <div class="modal" id="testModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header modal-header-v2">
+                    <h5 class="modal-title">Test switcher v modálnom okne</h5>
+                    
+                    <!-- LCSwitcher v hlavičke modálneho okna -->
+                    <div class="lc-switches d-flex">
+                        <div class="switch lang" role="combobox" aria-label="Výber jazyka" aria-expanded="false">
+                            <div class="current" tabindex="0" role="button" aria-haspopup="listbox">
+                                <span class="flag-icon flag-icon-sk"></span>
+                                <span class="text">SK</span>
+                            </div>
+                            <div class="options">
+                                <ul class="options-list" role="listbox" aria-label="Dostupné jazyky">
+                                    <li id="lang-sk-modal" role="option" aria-selected="true" class="selected" tabindex="-1">
+                                        <a href="/sk" class="lang-link">
+                                            <span class="flag-icon flag-icon-sk"></span>
+                                            <span class="text">Slovenčina</span>
+                                        </a>
+                                    </li>
+                                    <li id="lang-en-modal" role="option" aria-selected="false" tabindex="-1">
+                                        <a href="/en" class="lang-link">
+                                            <span class="flag-icon flag-icon-gb"></span>
+                                            <span class="text">English</span>
+                                        </a>
+                                    </li>
+                                    <li id="lang-de-modal" role="option" aria-selected="false" tabindex="-1">
+                                        <a href="/de" class="lang-link">
+                                            <span class="flag-icon flag-icon-de"></span>
+                                            <span class="text">Deutsch</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="switch currency" role="combobox" aria-label="Výber meny" aria-expanded="false">
+                            <div class="current" tabindex="0" role="button" aria-haspopup="listbox">
+                                <span class="text">EUR</span>
+                            </div>
+                            <div class="options">
+                                <ul class="options-list" role="listbox" aria-label="Dostupné meny">
+                                    <li id="curr-eur-modal" role="option" aria-selected="true" class="selected" tabindex="-1" data-currency="EUR">
+                                        <span class="text">EUR</span>
+                                    </li>
+                                    <li id="curr-usd-modal" role="option" aria-selected="false" tabindex="-1" data-currency="USD">
+                                        <span class="text">USD</span>
+                                    </li>
+                                    <li id="curr-czk-modal" role="option" aria-selected="false" tabindex="-1" data-currency="CZK">
+                                        <span class="text">CZK</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="close" onclick="closeModal()" aria-label="Zatvoriť">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <h6>Test scenáre:</h6>
+                    <ol>
+                        <li><strong>ESC klávesa:</strong> Otvorte dropdown a stlačte ESC - mal by sa zatvoriť iba dropdown</li>
+                        <li><strong>Klik mimo:</strong> Klik mimo dropdown-u by mal zatvoriť dropdown</li>
+                        <li><strong>Mobilný overlay:</strong> Na mobilných zariadeniach klik na tmavé pozadie zatvorí dropdown</li>
+                        <li><strong>Zatvorenie modálneho okna:</strong> ESC by nemalo zatvoriť modálne okno ak je otvorený dropdown</li>
+                    </ol>
+                    
+                    <p>Toto je obsah modálneho okna pre testovanie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    
+                    <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Zatvoriť</button>
+                    <button type="button" class="btn btn-primary">Uložiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="switcher-lang-currency-orso.js"></script>
+    <script>
+        function openModal() {
+            console.log('📖 Otváram modálne okno');
+            document.getElementById('testModal').classList.add('show');
+            
+            // Simulácia Bootstrap modal ESC handling
+            document.addEventListener('keydown', modalEscHandler);
+        }
+        
+        function closeModal() {
+            console.log('📖 Zatváram modálne okno');
+            document.getElementById('testModal').classList.remove('show');
+            document.removeEventListener('keydown', modalEscHandler);
+        }
+        
+        function modalEscHandler(e) {
+            if (e.key === 'Escape') {
+                console.log('📖 ESC v modálnom okne - kontrolujem či nie je otvorený dropdown');
+                
+                // Kontrola či nie je otvorený nejaký dropdown
+                const hasOpenDropdown = $('.switch.show-options').length > 0;
+                
+                if (!hasOpenDropdown) {
+                    console.log('📖 Žiadny dropdown nie je otvorený - zatváram modálne okno');
+                    closeModal();
+                } else {
+                    console.log('📖 Dropdown je otvorený - nezatváram modálne okno');
+                }
+            }
+        }
+        
+        // Klik na pozadie modálneho okna
+        document.getElementById('testModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        $(document).ready(function() {
+            console.log('🚀 Inicializujem LCSwitcher pre modálne okno test');
+            
+            LCSwitcher.init({
+                debug: true,
+                language: 'sk',
+                currency: 'EUR',
+                allowCurrencyChange: true
+            });
+        });
+    </script>
+</body>
+</html>

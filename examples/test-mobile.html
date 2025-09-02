@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test mobilného zobrazenia - Language Currency Switcher</title>
+    <link rel="stylesheet" href="switcher-lang-currency-orso.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .lc-switches {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .mobile-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .content-spacer {
+            height: 200px;
+            background: linear-gradient(45deg, #f0f0f0, #ffffff);
+            margin: 20px 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .test-container {
+                padding: 15px;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-info">
+        <h3>📱 Test mobilného zobrazenia</h3>
+        <p>Pre testovanie mobilného zobrazenia zmenšite okno prehliadača na šírku menej ako 768px alebo použite vývojárske nástroje (F12) a prepnite na mobilné zobrazenie.</p>
+        <p>Na mobilných zariadeniach sa dropdown bude otvárať na stred obrazovky s tmavým overlay pozadím.</p>
+    </div>
+
+    <div class="test-container">
+        <h2>Základný test</h2>
+        <div class="lc-switches d-flex">
+            <div class="switch lang" role="combobox" aria-label="Výber jazyka" aria-expanded="false">
+                <div class="current" tabindex="0" role="button" aria-haspopup="listbox">
+                    <span class="flag-icon flag-icon-sk"></span>
+                    <span class="text">SK</span>
+                </div>
+                <div class="options">
+                    <ul class="options-list" role="listbox" aria-label="Dostupné jazyky">
+                        <li id="lang-sk" role="option" aria-selected="true" class="selected" tabindex="-1">
+                            <a href="/sk" class="lang-link">
+                                <span class="flag-icon flag-icon-sk"></span>
+                                <span class="text">Slovenčina</span>
+                            </a>
+                        </li>
+                        <li id="lang-en" role="option" aria-selected="false" tabindex="-1">
+                            <a href="/en" class="lang-link">
+                                <span class="flag-icon flag-icon-gb"></span>
+                                <span class="text">English</span>
+                            </a>
+                        </li>
+                        <li id="lang-de" role="option" aria-selected="false" tabindex="-1">
+                            <a href="/de" class="lang-link">
+                                <span class="flag-icon flag-icon-de"></span>
+                                <span class="text">Deutsch</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="switch currency" role="combobox" aria-label="Výber meny" aria-expanded="false">
+                <div class="current" tabindex="0" role="button" aria-haspopup="listbox">
+                    <span class="text">EUR</span>
+                </div>
+                <div class="options">
+                    <ul class="options-list" role="listbox" aria-label="Dostupné meny">
+                        <li id="curr-eur" role="option" aria-selected="true" class="selected" tabindex="-1" data-currency="EUR">
+                            <span class="text">EUR</span>
+                        </li>
+                        <li id="curr-usd" role="option" aria-selected="false" tabindex="-1" data-currency="USD">
+                            <span class="text">USD</span>
+                        </li>
+                        <li id="curr-czk" role="option" aria-selected="false" tabindex="-1" data-currency="CZK">
+                            <span class="text">CZK</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-spacer">
+        <p>Obsah stránky pre test</p>
+    </div>
+
+    <div class="test-container">
+        <h2>Test v rôznych pozíciách</h2>
+        <p>Switcher na vrchu stránky:</p>
+        <div class="lc-switches d-flex">
+            <div class="switch lang" role="combobox" aria-label="Výber jazyka" aria-expanded="false">
+                <div class="current" tabindex="0" role="button" aria-haspopup="listbox">
+                    <span class="flag-icon flag-icon-sk"></span>
+                    <span class="text">SK</span>
+                </div>
+                <div class="options">
+                    <ul class="options-list" role="listbox" aria-label="Dostupné jazyky">
+                        <li role="option" aria-selected="true" class="selected" tabindex="-1">
+                            <a href="/sk" class="lang-link">
+                                <span class="flag-icon flag-icon-sk"></span>
+                                <span class="text">Slovenčina</span>
+                            </a>
+                        </li>
+                        <li role="option" aria-selected="false" tabindex="-1">
+                            <a href="/en" class="lang-link">
+                                <span class="flag-icon flag-icon-gb"></span>
+                                <span class="text">English</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-spacer">
+        <p>Viac obsahu pre posun</p>
+    </div>
+
+    <div class="content-spacer">
+        <p>Ešte viac obsahu</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="switcher-lang-currency-orso.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('🚀 Inicializujem LCSwitcher pre mobilný test');
+            
+            LCSwitcher.init({
+                debug: true,
+                language: 'sk',
+                currency: 'EUR',
+                allowCurrencyChange: true
+            });
+            
+            // Test resize events
+            $(window).on('resize', function() {
+                const width = $(window).width();
+                console.log('📱 Resize event:', width + 'px', width <= 768 ? '(mobilné)' : '(desktop)');
+            });
+        });
+    </script>
+</body>
+</html>

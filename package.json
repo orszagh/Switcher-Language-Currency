@@ -1,0 +1,64 @@
+{
+  "name": "jazykovy-menovy-prepinac",
+  "version": "1.0.0",
+  "description": "Responzívny jazykový a menový prepínač s podporou accessibility a mobilného dizajnu",
+  "main": "dist/switcher-lang-currency-orso.js",
+  "style": "dist/switcher-lang-currency-orso.css",
+  "files": [
+    "dist/",
+    "src/",
+    "examples/"
+  ],
+  "scripts": {
+    "build": "sass src/switcher-lang-currency-orso.scss dist/switcher-lang-currency-orso.css",
+    "build:min": "sass src/switcher-lang-currency-orso.scss dist/switcher-lang-currency-orso.min.css --style=compressed",
+    "watch": "sass --watch src/switcher-lang-currency-orso.scss:dist/switcher-lang-currency-orso.css",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "jazykovy-prepinac",
+    "menovy-prepinac",
+    "responzivny", 
+    "mobilny-dizajn",
+    "accessibility",
+    "jquery-plugin",
+    "dropdown",
+    "internationalization",
+    "lokalizacia",
+    "a11y",
+    "aria",
+    "viacjazyčný",
+    "modal-friendly"
+  ],
+  "author": {
+    "name": "Lubomir Orszagh",
+    "email": "orszagh.lubo@gmail.com",
+    "url": "https://github.com/orszagh"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/orszagh/jazykovy-menovy-prepinac#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orszagh/jazykovy-menovy-prepinac.git"
+  },
+  "bugs": {
+    "url": "https://github.com/orszagh/jazykovy-menovy-prepinac/issues"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "jquery": ">=3.0.0"
+  },
+  "devDependencies": {
+    "sass": "^1.69.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "ie >= 11"
+  ]
+}
