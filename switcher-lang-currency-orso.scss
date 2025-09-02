@@ -215,6 +215,11 @@ $color-dark: #313436;
             transition-delay: .3s;
         }
 
+        &:nth-child(5) {
+            transition-delay: .35s;
+        }
+
+
         &:hover,
         &:focus {
             background: rgba(0,0,0,.04);

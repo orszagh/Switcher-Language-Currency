@@ -217,6 +217,9 @@
             e.preventDefault();
             e.stopPropagation();
             
+            // Zaznamenaj čas button click pre globálny event
+            lastButtonClickTime = Date.now();
+            
             log('Klik na button pre', type, '- aktuálny stav:', $root.hasClass('show-options'));
             
             if ($root.hasClass('show-options')) {
@@ -244,6 +247,9 @@
 
         // Items events
         $items.on(`click.${switchId}`, function (e) {
+            // Zaznamenaj čas click pre globálny event
+            lastButtonClickTime = Date.now();
+            
             if (type === 'language') {
                 // Pre jazyky nechaj prirodzené správanie <a> linku
                 const $link = $(this).find('a.lang-link');
@@ -351,6 +357,7 @@
 
     // Globálne eventy - inicializujú sa iba raz
     let globalEventsInitialized = false;
+    let lastButtonClickTime = 0;
     
     function initGlobalEvents() {
         if (globalEventsInitialized) return;
@@ -359,6 +366,13 @@
         
         // Globálny document click
         $(document).on('click.lcswitch-global', function (e) {
+            // Ignoruj click ak bol nedávno button click (v posledných 100ms)
+            const now = Date.now();
+            if (now - lastButtonClickTime < 100) {
+                log('Ignorujem globálny click - nedávny button click');
+                return;
+            }
+            
             $('.switch.show-options').each(function() {
                 const $root = $(this);
                 if (!$(e.target).closest($root).length) {

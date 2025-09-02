@@ -124,6 +124,8 @@
        Spoločné dropdown eventy
        ------------------------------- */
     function setupDropdownEvents($root, $current, $listbox, $items, type) {
+        var switchId = 'switch-' + type + '-' + Math.random().toString(36).substr(2, 9);
+
         function setExpanded(open) {
             $current.attr('aria-expanded', open ? 'true' : 'false');
             if (!open) {
@@ -139,9 +141,15 @@
         function open() {
             log('Otváram dropdown pre', type);
 
-            // Zatvor ostatné
+            // Zatvor ostatné dropdowns
             $('.switch.show-options').not($root).each(function () {
-                close($(this));
+                var $otherRoot = $(this);
+                $otherRoot.removeClass('anim-options show-shadow');
+                $otherRoot.find('.current').attr('aria-expanded', 'false');
+                $otherRoot.find('[role="listbox"]').removeAttr('aria-activedescendant');
+                setTimeout(function () {
+                    return $otherRoot.removeClass('show-options');
+                }, 600);
             });
 
             $root.addClass('show-options');
@@ -218,8 +226,12 @@
         }
 
         // Button events
-        $current.on('click.switch-' + type, function (e) {
+        $current.on('click.' + switchId, function (e) {
+            e.preventDefault();
             e.stopPropagation();
+
+            log('Klik na button pre', type, '- aktuálny stav:', $root.hasClass('show-options'));
+
             if ($root.hasClass('show-options')) {
                 close();
             } else {
@@ -227,7 +239,7 @@
             }
         });
 
-        $current.on('keydown.switch-' + type, function (e) {
+        $current.on('keydown.' + switchId, function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 if ($root.hasClass('show-options')) close();else open();
@@ -243,7 +255,7 @@
         });
 
         // Items events
-        $items.on('click.switch-' + type, function (e) {
+        $items.on('click.' + switchId, function (e) {
             if (type === 'language') {
                 // Pre jazyky nechaj prirodzené správanie <a> linku
                 var $link = $(this).find('a.lang-link');
@@ -278,7 +290,7 @@
             }
         });
 
-        $items.on('keydown.switch-' + type, function (e) {
+        $items.on('keydown.' + switchId, function (e) {
             var $focusable = $items;
             var idx = $focusable.index(this);
 
@@ -344,22 +356,84 @@
             }
         });
 
-        // Global events
-        $(document).on('click.switch-' + type, function (e) {
-            if (!$(e.target).closest($root).length && $root.hasClass('show-options')) {
-                close();
+        // Uložiť referencie pre cleanup
+        $root.data('switchId', switchId);
+        $root.data('switchType', type);
+    }
+
+    // Globálne eventy - inicializujú sa iba raz
+    var globalEventsInitialized = false;
+
+    function initGlobalEvents() {
+        if (globalEventsInitialized) return;
+
+        log('Inicializácia globálnych switch eventov');
+
+        // Globálny document click
+        $(document).on('click.lcswitch-global', function (e) {
+            $('.switch.show-options').each(function () {
+                var $root = $(this);
+                if (!$(e.target).closest($root).length) {
+                    (function () {
+                        var $btn = $root.find('.current');
+                        $root.removeClass('anim-options show-shadow');
+                        $btn.attr('aria-expanded', 'false');
+                        $root.find('[role="listbox"]').removeAttr('aria-activedescendant');
+
+                        // Odstráň mobilný overlay
+                        var $overlay = $('.switch-mobile-overlay');
+                        if ($overlay.length > 0) {
+                            $overlay.removeClass('active');
+                            setTimeout(function () {
+                                $overlay.off('click.switch-overlay').remove();
+                            }, 300);
+                        }
+
+                        setTimeout(function () {
+                            return $root.removeClass('show-options');
+                        }, 600);
+                        log('Zatvorený dropdown z globálneho click eventu');
+                    })();
+                }
+            });
+        });
+
+        // Globálny ESC key handler
+        $(document).on('keydown.lcswitch-global', function (e) {
+            if (e.key === 'Escape') {
+                var $openDropdowns = $('.switch.show-options');
+                if ($openDropdowns.length > 0) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+
+                    $openDropdowns.each(function () {
+                        var $root = $(this);
+                        var $btn = $root.find('.current');
+                        $root.removeClass('anim-options show-shadow');
+                        $btn.attr('aria-expanded', 'false');
+                        $root.find('[role="listbox"]').removeAttr('aria-activedescendant');
+
+                        // Odstráň mobilný overlay
+                        var $overlay = $('.switch-mobile-overlay');
+                        if ($overlay.length > 0) {
+                            $overlay.removeClass('active');
+                            setTimeout(function () {
+                                $overlay.off('click.switch-overlay').remove();
+                            }, 300);
+                        }
+
+                        setTimeout(function () {
+                            return $root.removeClass('show-options');
+                        }, 600);
+                    });
+
+                    log('ESC klávesa - zatvorené všetky dropdowns, nie modálne okná');
+                }
             }
         });
 
-        $(document).on('keydown.switch-' + type, function (e) {
-            if (e.key === 'Escape' && $root.hasClass('show-options')) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                log('ESC klávesa - zatváram iba dropdown, nie modálne okno');
-                close();
-            }
-        });
+        globalEventsInitialized = true;
     }
 
     /* -------------------------------
@@ -381,6 +455,9 @@
             // Nastav debug mode
             DEBUG = !!options.debug;
             log('LCSwitcher inicializácia začatá', options);
+
+            // Inicializuj globálne eventy (iba raz)
+            initGlobalEvents();
 
             // Spracuj jazyky
             var langsInput = options.languages || ["cz|Česky", "en|English"];
@@ -457,10 +534,22 @@
         destroy: function destroy() {
             log('Odstraňovanie LCSwitcher eventov');
 
-            // Odstráň všetky switch eventy
-            $('.switch').off('.switch-language .switch-currency');
-            $(document).off('.switch-language .switch-currency');
-            $(window).off('.switch-language .switch-currency');
+            // Odstráň individuálne switch eventy
+            $('.switch').each(function () {
+                var $root = $(this);
+                var switchId = $root.data('switchId');
+                if (switchId) {
+                    $root.find('.current').off('.' + switchId);
+                    $root.find('[role="option"]').off('.' + switchId);
+                }
+            });
+
+            // Odstráň globálne eventy
+            $(document).off('.lcswitch-global');
+            $(window).off('.lcswitch-global');
+
+            // Reset flag
+            globalEventsInitialized = false;
 
             // Vyčisti pozičné triedy
             $('.switch .options').removeClass('dropdown-top dropdown-right dropdown-left');
