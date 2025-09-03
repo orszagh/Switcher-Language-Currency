@@ -1,26 +1,26 @@
 /*
- * Language & Currency Switcher SCSS
- * ==================================
+ * Prepínač jazykov a mien SCSS
+ * =============================
  * 
- * COMPLETE CSS CUSTOM PROPERTIES SYSTEM
- * Features 67 CSS variables with --tp-lang-switcher- prefix
- * Full theming control for colors, sizes, fonts, transitions, z-index
+ * KOMPLETNÝ SYSTÉM CSS CUSTOM PROPERTIES
+ * 67 CSS premenných s prefixom --tp-lang-switcher-
+ * Úplná kontrola témy pre farby, veľkosti, fonty, prechody, z-index
  * 
- * FLAG INTEGRATION
- * Supports SVG flags from ~/Content/flags/4x3/*.svg
- * Automatic flag generation for 15+ countries
+ * INTEGRÁCIA VLAJOK
+ * Podporuje SVG vlajky z ~/Content/flags/4x3/*.svg
+ * Automatické generovanie vlajok pre 15+ krajín
  * 
- * MOBILE OPTIMIZATION  
- * Fixed bottom-left positioning as requested
- * Touch-friendly overlay system
- * Responsive breakpoints at 768px
+ * MOBILNÁ OPTIMALIZÁCIA
+ * Fixné pozíciovanie vľavo dole podľa požiadavky
+ * Overlay systém priateľský na dotyk
+ * Responzívne breakpointy na 768px
  * 
  * ACCESSIBILITY
- * Full ARIA support, screen reader text
- * Focus management and keyboard navigation
- * High contrast and reduced motion support
+ * Plná ARIA podpora, text pre screen readery
+ * Správa fokusu a klávesová navigácia
+ * Podpora vysokého kontrastu a zmenšeného pohybu
  * 
- * COMPILE TO: switcher-lang-currency-orso.css
+ * KOMPILOVAŤ DO: switcher-lang-currency-orso.css
  */
 
 // CSS Custom Properties (CSS Variables) s prefixom --tp-lang-switcher-

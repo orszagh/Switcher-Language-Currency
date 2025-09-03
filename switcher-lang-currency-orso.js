@@ -1,45 +1,45 @@
 /* 
- * Language & Currency Switcher (server-driven, accessibility-first)
- * ==================================================================
+ * Prepínač jazykov a mien (server-driven, accessibility-first)
+ * =============================================================
  * 
- * COMPLETE FEATURE SET (for AI continuity):
- * - Language switching: Always visible with <a href> navigation links
- * - Currency switching: UI-only with configurable display
- * - Flag integration: SVG flags from ~/Content/flags/4x3/*.svg
- * - Mobile optimization: Fixed bottom-left positioning with overlay
- * - CSS custom properties: 67 variables with --tp-lang-switcher- prefix
- * - Label support: Optional text prefixes for both language and currency
- * - Accessibility: Full ARIA support, screen reader announcements
- * - Event handling: Native addEventListener with proper cleanup
+ * KOMPLETNÁ SADA FUNKCIÍ (pre kontinuitu AI):
+ * - Prepínanie jazykov: Vždy viditeľné s <a href> navigačnými odkazmi
+ * - Prepínanie mien: Iba UI s konfigurovateľným zobrazením
+ * - Integrácia vlajok: SVG vlajky z ~/Content/flags/4x3/*.svg
+ * - Mobilná optimalizácia: Fixné pozíciovanie vľavo dole s overlay
+ * - CSS custom properties: 67 premenných s prefixom --tp-lang-switcher-
+ * - Podpora labelov: Voliteľné textové prefixy pre jazyk aj menu
+ * - Accessibility: Plná ARIA podpora, oznámenia pre screen readery
+ * - Správa eventov: Natívny addEventListener s proper cleanup
  * 
- * HTML STRUCTURE REQUIREMENTS:
+ * POŽIADAVKY NA HTML ŠTRUKTÚRU:
  * ```html
  * <div class="switch lang">
  *   <button class="current" role="combobox" aria-expanded="false" aria-haspopup="listbox">
- *     <!-- Generated: flag + text + sr-only + arrow -->
+ *     <!-- Generované: vlajka + text + sr-only + šípka -->
  *   </button>
  *   <ul class="options" role="listbox">
- *     <!-- Generated language options with flags -->
+ *     <!-- Generované jazykové možnosti s vlajkami -->
  *   </ul>
  * </div>
  * ```
  * 
- * DEPENDENCIES:
+ * ZÁVISLOSTI:
  * - jQuery 3.0+
- * - switcher-lang-currency-orso.css (compiled from SCSS)
- * - SVG flag files in ~/Content/flags/4x3/ directory
+ * - switcher-lang-currency-orso.css (skompilované z SCSS)
+ * - SVG súbory vlajok v adresári ~/Content/flags/4x3/
  * 
- * INITIALIZATION:
+ * INICIALIZÁCIA:
  * ```javascript
  * LCSwitcher.init({
- *   language: 'sk',           // Current language code
- *   currency: 'eur',          // Current currency code  
- *   languages: ['sk|Slovenčina', 'en|English'], // Available languages
- *   languageLabel: 'Language:', // Optional text prefix
- *   currencyLabel: 'Currency:', // Optional text prefix
- *   allowCurrencyChange: true, // Show/hide currency switcher
+ *   language: 'sk',           // Kód aktuálneho jazyka
+ *   currency: 'eur',          // Kód aktuálnej meny  
+ *   languages: ['sk|Slovenčina', 'en|English'], // Dostupné jazyky
+ *   languageLabel: 'Jazyk:',  // Voliteľný textový prefix
+ *   currencyLabel: 'Mena:',   // Voliteľný textový prefix
+ *   allowCurrencyChange: true, // Zobraziť/skryť menový prepínač
  *   languageChangeUrl: '/Home/ChangeLanguage?code={CODE}',
- *   debug: false              // Console logging
+ *   debug: false              // Logovania do konzoly
  * });
  * ```
  */
@@ -57,13 +57,13 @@
     }
 
     /* ===============================
-     * UTILITY FUNCTIONS
+     * POMOCNÉ FUNKCIE
      * =============================== */
     
     /**
-     * Extracts language code from HTML document element
-     * Falls back to empty string if not found
-     * @returns {string} Language code (e.g., 'sk', 'en')
+     * Získa kód jazyka z HTML document elementu
+     * Fallback na prázdny reťazec ak sa nenájde
+     * @returns {string} Kód jazyka (napr. 'sk', 'en')
      */
     function getHtmlLang() {
         const lang = (document.documentElement.lang || '').trim();
@@ -75,6 +75,12 @@
      * Handles special cases like 'en' -> 'gb'
      * @param {string} langCode - Language code (e.g., 'en', 'sk')
      * @returns {string} Flag country code for CSS class
+     */
+    /**
+     * Mapuje kódy jazykov na kódy krajín pre vlajky
+     * Riešenie špeciálnych prípadov ako 'en' -> 'gb'
+     * @param {string} langCode - Kód jazyka (napr. 'en', 'sk')
+     * @returns {string} Kód krajiny pre CSS triedu vlajky
      */
     function getFlagCode(langCode) {
         // Mapovanie jazykových kódov na vlajky
@@ -97,11 +103,11 @@
     }
 
     /**
-     * Creates HTML span element with flag icon CSS classes
-     * Uses flag-icon library convention
-     * @param {string} langCode - Language code
-     * @param {string} additionalClasses - Extra CSS classes
-     * @returns {string} HTML span element with flag classes
+     * Vytvorí HTML span element s CSS triedami ikony vlajky
+     * Používa konvenciu flag-icon knižnice
+     * @param {string} langCode - Kód jazyka
+     * @param {string} additionalClasses - Extra CSS triedy
+     * @returns {string} HTML span element s triedami vlajky
      */
     function createFlagSpan(langCode, additionalClasses = '') {
         const flagCode = getFlagCode(langCode);
@@ -109,9 +115,9 @@
     }
 
     /**
-     * Creates or updates live region for screen reader announcements
-     * Ensures accessibility for dynamic content changes
-     * @param {string} msg - Message to announce to screen readers
+     * Vytvorí alebo aktualizuje live región pre oznámenia screen readerom
+     * Zabezpečuje accessibility pre dynamické zmeny obsahu
+     * @param {string} msg - Správa na oznámenie screen readerom
      */
     function announce(msg) {
         // Vytvor live region ak neexistuje
@@ -131,16 +137,16 @@
     }
 
     /* ===============================
-     * LANGUAGE SWITCHER (Always Active)
+     * JAZYKOVÝ PREPÍNAČ (Vždy aktívny)
      * ===============================
      * 
-     * Features:
-     * - Always visible and functional
-     * - Generates proper <a href> navigation links
-     * - Integrates SVG flags from mapping system
-     * - Supports optional text labels
-     * - Maintains current language state
-     * - Full accessibility with ARIA
+     * Funkcie:
+     * - Vždy viditeľný a funkčný
+     * - Generuje správne <a href> navigačné odkazy
+     * - Integruje SVG vlajky z mapovacieho systému
+     * - Podporuje voliteľné textové labely
+     * - Udržiava stav aktuálneho jazyka
+     * - Plná accessibility s ARIA
      */
     function initLanguageSwitch($root, options) {
         const currentLang = options.language || getHtmlLang() || 'sk';
@@ -230,16 +236,16 @@
     }
 
     /* ===============================
-     * CURRENCY SWITCHER (Conditional)
+     * MENOVÝ PREPÍNAČ (Podmienečný)
      * ===============================
      * 
-     * Features:
-     * - Shows only if allowCurrencyChange !== false
-     * - UI-only switching (no navigation)
-     * - Supports optional text labels
-     * - Preserves label text during currency changes
-     * - Triggers global callback: window.onCurrencyChange()
-     * - Full accessibility with ARIA
+     * Funkcie:
+     * - Zobrazuje sa iba ak allowCurrencyChange !== false
+     * - Iba UI prepínanie (žiadna navigácia)
+     * - Podporuje voliteľné textové labely
+     * - Zachováva text labelu počas zmien meny
+     * - Spúšťa globálny callback: window.onCurrencyChange()
+     * - Plná accessibility s ARIA
      */
     function initCurrencySwitch($root, options) {
         const currentCurrency = options.currency || 'eur';
@@ -300,18 +306,18 @@
     }
 
     /* ===============================
-     * DROPDOWN EVENT MANAGEMENT
+     * SPRÁVA DROPDOWN EVENTOV
      * ===============================
      * 
-     * Shared event handling for both language and currency dropdowns
-     * Features:
-     * - Native addEventListener with capture phase
-     * - Mobile overlay system for touch devices
-     * - Keyboard navigation (Arrow keys, Home, End, Escape)
-     * - Global click-outside-to-close
-     * - Proper ARIA state management
-     * - Responsive behavior with media queries
-     * - Event namespace isolation (prevents conflicts)
+     * Zdieľaná správa eventov pre jazykové aj menové dropdowny
+     * Funkcie:
+     * - Natívny addEventListener s capture fázou
+     * - Mobilný overlay systém pre dotyková zariadenia
+     * - Klávesová navigácia (šípky, Home, End, Escape)
+     * - Globálne klik-mimo-na-zatvorenie
+     * - Správna správa ARIA stavov
+     * - Responzívne správanie s media queries
+     * - Izolácia event namespace (predchádza konfliktom)
      */
     function setupDropdownEvents($root, $current, $listbox, $items, type) {
         /**
@@ -614,25 +620,25 @@
     }
 
     /* ===============================
-     * PUBLIC API: LCSwitcher
+     * VEREJNÉ API: LCSwitcher
      * ===============================
      * 
-     * Main plugin interface with comprehensive options
-     * Handles both language and currency switching
-     * Includes debug utilities and cleanup methods
+     * Hlavné rozhranie pluginu s komplexnými možnosťami
+     * Riešenie prepínania jazykov aj mien
+     * Obsahuje debug nástroje a cleanup metódy
      */
     const LCSwitcher = {
         /**
-         * Main initialization method
-         * @param {Object} options - Configuration object
-         * @param {string=} options.language - Current language code (fallback: <html lang>)
-         * @param {string=} options.currency - Current currency code for currency switcher
-         * @param {string[]=} options.languages - Array of "code|Label" strings (default: CZ + EN)
-         * @param {boolean=} options.allowCurrencyChange - Show currency switcher (default: true)
-         * @param {string=} options.languageChangeUrl - URL template for language links
-         * @param {string=} options.languageLabel - Text prefix for language selector
-         * @param {string=} options.currencyLabel - Text prefix for currency selector
-         * @param {boolean=} options.debug - Enable console logging (default: false)
+         * Hlavná inicializačná metóda
+         * @param {Object} options - Konfiguračný objekt
+         * @param {string=} options.language - Kód aktuálneho jazyka (fallback: <html lang>)
+         * @param {string=} options.currency - Kód aktuálnej meny pre menový prepínač
+         * @param {string[]=} options.languages - Pole reťazcov "kod|Label" (default: CZ + EN)
+         * @param {boolean=} options.allowCurrencyChange - Zobraziť menový prepínač (default: true)
+         * @param {string=} options.languageChangeUrl - URL šablóna pre jazykové odkazy
+         * @param {string=} options.languageLabel - Textový prefix pre výber jazyka
+         * @param {string=} options.currencyLabel - Textový prefix pre výber meny
+         * @param {boolean=} options.debug - Povoliť logovania do konzoly (default: false)
          */
         init(options) {
             options = options || {};
@@ -759,11 +765,11 @@
 })(jQuery, window, document);
 
 /* ===============================
- * AUTO-INITIALIZATION
+ * AUTOMATICKÁ INICIALIZÁCIA
  * ===============================
  * 
- * Default setup for immediate use
- * Customize these values for your application
+ * Predvolené nastavenie pre okamžité použitie
+ * Prispôsobte tieto hodnoty pre vašu aplikáciu
  */
 $(document).ready(function () {
     if (window.LCSwitcher) {
