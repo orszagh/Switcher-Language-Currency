@@ -12,6 +12,8 @@
       languages: string[] v tvare "kod|Label" 
       allowCurrencyChange: boolean (default true) – či zobraziť currency switcher
       languageChangeUrl: string (default '/Home/ChangeLanguage?code={CODE}')
+      languageLabel: string (default 'Language') – text pred jazykovým prepínačom, "" = nezobrazí
+      currencyLabel: string (default 'Currency') – text pred menovým prepínačom, "" = nezobrazí
       debug: boolean (default false) – debug výpisy do konzoly
 */
 
@@ -52,17 +54,51 @@
         log('Oznámené:', msg);
     }
 
+    function addSwitcherLabel($root, labelText, type) {
+        // Skontroluj či už label neexistuje
+        const existingLabel = $root.find('.switcher-label');
+        
+        if (!labelText || labelText.trim() === '') {
+            // Ak je text prázdny, odstráň existujúci label
+            if (existingLabel.length > 0) {
+                existingLabel.remove();
+                log('Odstránený label pre', type);
+            }
+            log('Label pre', type, 'je prázdny, preskakujem');
+            return;
+        }
+
+        if (existingLabel.length > 0) {
+            existingLabel.text(labelText);
+            log('Aktualizovaný existujúci label pre', type, ':', labelText);
+            return;
+        }
+
+        // Vytvor nový label element
+        const $label = $('<span class="switcher-label"></span>');
+        $label.text(labelText);
+        $label.attr('aria-hidden', 'true'); // Label je iba vizuálny
+        
+        // Pridaj label pred button
+        $root.prepend($label);
+        log('Pridaný label pre', type, ':', labelText);
+    }
+
     /* -------------------------------
        Language Switcher (vždy aktívny s href linkami)
        ------------------------------- */
     function initLanguageSwitch($root, options) {
         const currentLang = options.language || getHtmlLang() || 'sk';
         const urlTemplate = options.languageChangeUrl || '/Home/ChangeLanguage?code={CODE}';
+        const labelText = options.languageLabel !== undefined ? options.languageLabel : 'Language';
 
         const $current = $root.find('.current');
         const $listbox = $root.find('[role="listbox"]');
 
-        log('Inicializácia jazykového prepínača', { currentLang, urlTemplate });
+        log('Inicializácia jazykového prepínača', { currentLang, urlTemplate, labelText });
+
+        // Pridaj label ak je definovaný
+        addSwitcherLabel($root, labelText, 'language');
 
         // Nastav aktuálny jazyk v UI
         $current.find('span[aria-hidden="true"]').text(currentLang.toUpperCase());
@@ -101,12 +137,16 @@
        ------------------------------- */
     function initCurrencySwitch($root, options) {
         const currentCurrency = options.currency || 'eur';
+        const labelText = options.currencyLabel !== undefined ? options.currencyLabel : 'Currency';
 
         const $current = $root.find('.current');
         const $listbox = $root.find('[role="listbox"]');
         const $items = $listbox.find('[role="option"]').attr('tabindex', '-1');
 
-        log('Inicializácia menového prepínača', { currentCurrency });
+        log('Inicializácia menového prepínača', { currentCurrency, labelText });
+
+        // Pridaj label ak je definovaný
+        addSwitcherLabel($root, labelText, 'currency');
 
         // Nastav aktuálnu menu v UI
         $current.find('span[aria-hidden="true"]').text(currentCurrency.toUpperCase());
@@ -444,6 +484,8 @@
          * @param {string[]=} options.languages - pole "kod|Label" (default CZ + EN)
          * @param {boolean=} options.allowCurrencyChange - zobraziť currency switcher (default true)
          * @param {string=} options.languageChangeUrl - URL template pre zmenu jazyka
+         * @param {string=} options.languageLabel - text pred jazykovým prepínačom (default 'Language', "" = nezobrazí)
+         * @param {string=} options.currencyLabel - text pred menovým prepínačom (default 'Currency', "" = nezobrazí)
          * @param {boolean=} options.debug - zapnúť debug výpisy (default false)
          */
         init(options) {
@@ -490,7 +532,8 @@
                 initLanguageSwitch($(this), {
                     language: currentLanguage,
                     languages: languages,
-                    languageChangeUrl: options.languageChangeUrl
+                    languageChangeUrl: options.languageChangeUrl,
+                    languageLabel: options.languageLabel
                 });
             });
 
@@ -502,7 +545,8 @@
                 $currSwitchers.each(function () {
                     initCurrencySwitch($(this), {
                         currency: options.currency,
-                        allowCurrencyChange: options.allowCurrencyChange
+                        allowCurrencyChange: options.allowCurrencyChange,
+                        currencyLabel: options.currencyLabel
                     });
                 });
             } else {
@@ -553,6 +597,9 @@
             $(document).off('.lcswitch-global');
             $(window).off('.lcswitch-global');
             
+            // Odstráň všetky labely
+            $('.switcher-label').remove();
+            
             // Reset flags
             globalEventsInitialized = false;
             switcherInitialized = false;
@@ -567,8 +614,8 @@
         }
     };
 
-    // Export do globálu
-    window.LCSwitcher = LCSwitcher;
+    // Export do globálua
+    window.LCSwitcher = LCSwitcher; 
 
 })(jQuery, window, document);
 

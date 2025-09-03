@@ -16,6 +16,21 @@ $color-dark: #313436;
     cursor: pointer;
     display: flex;
     align-items: center;
+    gap: 8px; // Medzera medzi labelom a switcherom
+}
+
+.switcher-label {
+    font-size: 0.9rem;
+    color: $color-dark;
+    font-weight: 500;
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1;
+    
+    // Responzívne správanie
+    @media (max-width: 768px) {
+        font-size: 0.8rem;
+    }
 }
 
 .current {

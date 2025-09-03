@@ -1,4 +1,4 @@
-# Switcher: Language & Currency v1.0.0
+# Switcher: Language & Currency v1.1.0
 
 Responzívny jQuery plugin pre prepínanie jazykov a mien s plnou podporou accessibility.
 
@@ -6,6 +6,7 @@ Responzívny jQuery plugin pre prepínanie jazykov a mien s plnou podporou acces
 
 - ✅ **Jazykový prepínač** - Vždy aktívny s href linkami
 - ✅ **Menový prepínač** - Konfigurovateľný UI prepínač
+- ✅ **Konfigurovateľné labely** - Pridanie textov pred prepínače (NEW v1.1.0)
 - ✅ **Mobilná optimalizácia** - Overlay a dotykové ovládanie
 - ✅ **Accessibility** - Plná podpora ARIA a screen readerov
 - ✅ **Klávesová navigácia** - Arrow keys, Enter, Escape, Home, End
@@ -77,9 +78,33 @@ LCSwitcher.init({
 | `language` | string | z `<html lang>` | Aktuálny jazyk |
 | `languages` | string[] | `["cz\|Česky", "en\|English"]` | Dostupné jazyky v tvare "kod\|Label" |
 | `languageChangeUrl` | string | `/Home/ChangeLanguage?code={CODE}` | URL template pre zmenu jazyka |
+| `languageLabel` | string | `'Language'` | **NOVÉ v1.1.0** - Text pred jazykovým prepínačom, `''` = nezobrazí |
 | `currency` | string | - | Aktuálna mena |
 | `allowCurrencyChange` | boolean | `true` | Či zobraziť menový prepínač |
+| `currencyLabel` | string | `'Currency'` | **NOVÉ v1.1.0** - Text pred menovým prepínačom, `''` = nezobrazí |
 | `debug` | boolean | `false` | Debug výpisy do konzoly |
+
+## Nové v v1.1.0 - Konfigurovateľné labely
+
+```javascript
+LCSwitcher.init({
+    // Štandardné labely
+    languageLabel: 'Language',
+    currencyLabel: 'Currency',
+    
+    // Slovenské labely
+    languageLabel: 'Jazyk:',
+    currencyLabel: 'Mena:',
+    
+    // Bez labelov
+    languageLabel: '',
+    currencyLabel: '',
+    
+    // Iba jeden label
+    languageLabel: 'Select Language',
+    currencyLabel: ''  // menový bez labelu
+});
+```
 
 ## API
 

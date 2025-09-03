@@ -12,6 +12,21 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.switcher-label {
+  font-size: 0.9rem;
+  color: #313436;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1;
+}
+@media (max-width: 768px) {
+  .switcher-label {
+    font-size: 0.8rem;
+  }
 }
 
 .current {
