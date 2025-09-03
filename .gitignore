@@ -1,3 +1,12 @@
+# Language & Currency Switcher - Git Ignore
+# ==========================================
+
+# Test files (cleanup completed)
+test-*.html
+debug-*.html
+*-test.html
+*-debug.html
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -64,7 +73,7 @@ coverage/
 # Sass cache
 .sass-cache/
 
-# Project specific
+# Project specific (preserve these for main project)
 Web.config
 Global.asax*
 *.ashx*
@@ -74,3 +83,12 @@ bundleconfig.json*
 compilerconfig.json*
 Parameters.xml
 packages.config
+
+# Development documentation drafts
+README-*.md
+*-draft.md
+
+# Backup files
+*.bak
+*.backup
+*.orig

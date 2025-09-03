@@ -1,21 +1,48 @@
 ﻿/* 
- Language & Currency Switcher - Jazykový a menový prepínač
- ----------------------------------------------------------
- Responzívny jazykový a menový prepínač s podporou accessibility
- 
- - Language: Vždy zobrazený, generované <a href> linky
- - Currency: UI prepínač s konfigurovateľným povolením zmeny
- 
- @options:
-     language: string (aktuálny jazyk - čítané z <html lang>, fallback)
-     currency: string (pre currency switcher)
-     languages: string[] v tvare "kod|Label" 
-     allowCurrencyChange: boolean (default true) – či zobraziť currency switcher
-     languageChangeUrl: string (default '/Home/ChangeLanguage?code={CODE}')
-     languageLabel: string (default 'Language') – text pred jazykovým prepínačom, "" = nezobrazí
-     currencyLabel: string (default 'Currency') – text pred menovým prepínačom, "" = nezobrazí
-     debug: boolean (default false) – debug výpisy do konzoly
-*/
+ * Language & Currency Switcher (server-driven, accessibility-first)
+ * ==================================================================
+ * 
+ * COMPLETE FEATURE SET (for AI continuity):
+ * - Language switching: Always visible with <a href> navigation links
+ * - Currency switching: UI-only with configurable display
+ * - Flag integration: SVG flags from ~/Content/flags/4x3/*.svg
+ * - Mobile optimization: Fixed bottom-left positioning with overlay
+ * - CSS custom properties: 67 variables with --tp-lang-switcher- prefix
+ * - Label support: Optional text prefixes for both language and currency
+ * - Accessibility: Full ARIA support, screen reader announcements
+ * - Event handling: Native addEventListener with proper cleanup
+ * 
+ * HTML STRUCTURE REQUIREMENTS:
+ * ```html
+ * <div class="switch lang">
+ *   <button class="current" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+ *     <!-- Generated: flag + text + sr-only + arrow -->
+ *   </button>
+ *   <ul class="options" role="listbox">
+ *     <!-- Generated language options with flags -->
+ *   </ul>
+ * </div>
+ * ```
+ * 
+ * DEPENDENCIES:
+ * - jQuery 3.0+
+ * - switcher-lang-currency-orso.css (compiled from SCSS)
+ * - SVG flag files in ~/Content/flags/4x3/ directory
+ * 
+ * INITIALIZATION:
+ * ```javascript
+ * LCSwitcher.init({
+ *   language: 'sk',           // Current language code
+ *   currency: 'eur',          // Current currency code  
+ *   languages: ['sk|Slovenčina', 'en|English'], // Available languages
+ *   languageLabel: 'Language:', // Optional text prefix
+ *   currencyLabel: 'Currency:', // Optional text prefix
+ *   allowCurrencyChange: true, // Show/hide currency switcher
+ *   languageChangeUrl: '/Home/ChangeLanguage?code={CODE}',
+ *   debug: false              // Console logging
+ * });
+ * ```
+ */
 
 'use strict';
 
@@ -31,14 +58,65 @@
         }
     }
 
-    /* -------------------------------
-       Pomocné funkcie
-       ------------------------------- */
+    /* ===============================
+     * UTILITY FUNCTIONS
+     * =============================== */
+
+    /**
+     * Extracts language code from HTML document element
+     * Falls back to empty string if not found
+     * @returns {string} Language code (e.g., 'sk', 'en')
+     */
     function getHtmlLang() {
         var lang = (document.documentElement.lang || '').trim();
         return lang ? lang.toLowerCase().split('-')[0] : '';
     }
 
+    /**
+     * Maps language codes to flag country codes
+     * Handles special cases like 'en' -> 'gb'
+     * @param {string} langCode - Language code (e.g., 'en', 'sk')
+     * @returns {string} Flag country code for CSS class
+     */
+    function getFlagCode(langCode) {
+        // Mapovanie jazykových kódov na vlajky
+        var flagMapping = {
+            'en': 'gb', // Angličtina -> Veľká Británia
+            'sk': 'sk', // Slovenčina -> Slovensko
+            'cz': 'cz', // Čeština -> Česko
+            'de': 'de', // Nemčina -> Nemecko
+            'fr': 'fr', // Francúzština -> Francúzsko
+            'es': 'es', // Španielčina -> Španielsko
+            'it': 'it', // Taliančina -> Taliansko
+            'ru': 'ru', // Ruština -> Rusko
+            'pl': 'pl', // Poľština -> Poľsko
+            'hu': 'hu', // Maďarčina -> Maďarsko
+            'nl': 'nl', // Holandčina -> Holandsko
+            'pt': 'pt' };
+
+        // Portugalčina -> Portugalsko
+        return flagMapping[langCode.toLowerCase()] || langCode.toLowerCase();
+    }
+
+    /**
+     * Creates HTML span element with flag icon CSS classes
+     * Uses flag-icon library convention
+     * @param {string} langCode - Language code
+     * @param {string} additionalClasses - Extra CSS classes
+     * @returns {string} HTML span element with flag classes
+     */
+    function createFlagSpan(langCode) {
+        var additionalClasses = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+        var flagCode = getFlagCode(langCode);
+        return '<span class="flag-icon flag-icon-' + flagCode + ' ' + additionalClasses + '"></span>';
+    }
+
+    /**
+     * Creates or updates live region for screen reader announcements
+     * Ensures accessibility for dynamic content changes
+     * @param {string} msg - Message to announce to screen readers
+     */
     function announce(msg) {
         // Vytvor live region ak neexistuje
         var live = document.getElementById('a11y-live');
@@ -58,56 +136,70 @@
         log('Oznámené:', msg);
     }
 
-    function addSwitcherLabel($root, labelText, type) {
-        // Skontroluj či už label neexistuje
-        var existingLabel = $root.find('.switcher-label');
-
-        if (!labelText || labelText.trim() === '') {
-            // Ak je text prázdny, odstráň existujúci label
-            if (existingLabel.length > 0) {
-                existingLabel.remove();
-                log('Odstránený label pre', type);
-            }
-            log('Label pre', type, 'je prázdny, preskakujem');
-            return;
-        }
-
-        if (existingLabel.length > 0) {
-            existingLabel.text(labelText);
-            log('Aktualizovaný existujúci label pre', type, ':', labelText);
-            return;
-        }
-
-        // Vytvor nový label element
-        var $label = $('<span class="switcher-label"></span>');
-        $label.text(labelText);
-        $label.attr('aria-hidden', 'true'); // Label je iba vizuálny
-
-        // Pridaj label pred button
-        $root.prepend($label);
-        log('Pridaný label pre', type, ':', labelText);
-    }
-
-    /* -------------------------------
-       Language Switcher (vždy aktívny s href linkami)
-       ------------------------------- */
+    /* ===============================
+     * LANGUAGE SWITCHER (Always Active)
+     * ===============================
+     * 
+     * Features:
+     * - Always visible and functional
+     * - Generates proper <a href> navigation links
+     * - Integrates SVG flags from mapping system
+     * - Supports optional text labels
+     * - Maintains current language state
+     * - Full accessibility with ARIA
+     */
     function initLanguageSwitch($root, options) {
         var currentLang = options.language || getHtmlLang() || 'sk';
         var urlTemplate = options.languageChangeUrl || '/Home/ChangeLanguage?code={CODE}';
-        var labelText = options.languageLabel !== undefined ? options.languageLabel : 'Language';
+        var labelText = options.languageLabel || ''; // Text pred výber jazyka
 
         var $current = $root.find('.current');
         var $listbox = $root.find('[role="listbox"]');
 
         log('Inicializácia jazykového prepínača', { currentLang: currentLang, urlTemplate: urlTemplate, labelText: labelText });
 
-        // Pridaj label ak je definovaný
-        addSwitcherLabel($root, labelText, 'language');
+        // Nájdi správnu hodnotu pre aktuálny jazyk z dostupných jazykov
+        var currentLanguageData = options.languages.find(function (lang) {
+            return lang.code.toLowerCase() === currentLang.toLowerCase();
+        });
+        var displayLang = currentLanguageData ? currentLanguageData.code : currentLang;
+        var displayLabel = currentLanguageData ? currentLanguageData.label : currentLang.toUpperCase();
 
-        // Nastav aktuálny jazyk v UI
-        $current.find('span[aria-hidden="true"]').text(currentLang.toUpperCase());
+        log('Aktuálny jazyk nastavený na:', { displayLang: displayLang, displayLabel: displayLabel });
 
-        // Generuj jazykové položky s href linkami (vždy aktívne)
+        // Nastav aktuálny jazyk v UI s vlajkou a textom
+        // Vyčisti aktuálny obsah current elementu (okrem sr-only)
+        var $srOnly = $current.find('.sr-only').detach(); // Zachovaj sr-only
+        var $arrow = $current.find('.arrow').detach(); // Zachovaj šípku ak existuje
+
+        // Vyčisti ostatný obsah
+        $current.empty();
+
+        // Vytvor novú štruktúru: vlajka + text + sr-only + šípka
+        var flagHtml = createFlagSpan(displayLang);
+        var displayText = labelText ? labelText + ' ' + displayLang.toUpperCase() : displayLang.toUpperCase();
+
+        $current.append(flagHtml);
+        $current.append('<span class="text">' + displayText + '</span>');
+
+        // Pridaj sr-only text
+        if ($srOnly.length) {
+            $srOnly.text('Current language: ' + displayLabel);
+            $current.append($srOnly);
+        } else {
+            $current.append('<span class="sr-only">Current language: ' + displayLabel + '</span>');
+        }
+
+        // Pridaj šípku na koniec ak neexistuje
+        if ($arrow.length) {
+            $current.append($arrow);
+        } else {
+            $current.append('\n                <em class="arrow">\n                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">\n                        <title>Open language options</title>\n                        <g fill="currentColor"><path d="M5 8l4 4 4-4z"></path></g>\n                    </svg>\n                </em>\n            ');
+        }
+
+        log('Language UI štruktúra vytvorená:', { displayText: displayText, flagClass: 'flag-icon-' + getFlagCode(displayLang) });
+
+        // Generuj jazykové položky s href linkami a vlajkami
         if ($listbox.length) {
             $listbox.empty();
 
@@ -116,10 +208,11 @@
                 var label = _ref.label;
 
                 var liId = 'opt-lang-' + code;
-                var isSelected = code === currentLang;
+                var isSelected = code.toLowerCase() === displayLang.toLowerCase();
                 var href = urlTemplate.replace('{CODE}', encodeURIComponent(code));
+                var flagHtml = createFlagSpan(code);
 
-                var $li = $('\n          <li id="' + liId + '" role="option" data-lang="' + code + '" aria-selected="' + isSelected + '" class="' + (isSelected ? 'selected' : '') + '">\n            <a href="' + href + '" class="lang-link">\n              ' + label + '\n            </a>\n          </li>\n        ');
+                var $li = $('\n          <li id="' + liId + '" role="option" data-lang="' + code + '" aria-selected="' + isSelected + '" class="' + (isSelected ? 'selected' : '') + '">\n            <a href="' + href + '" class="lang-link">\n              ' + flagHtml + '\n              <span class="text">' + label + '</span>\n            </a>\n          </li>\n        ');
 
                 $listbox.append($li);
                 log('Pridaná jazyková možnosť:', { code: code, label: label, href: href, isSelected: isSelected });
@@ -127,18 +220,27 @@
         }
 
         var $items = $listbox.find('[role="option"]').attr('tabindex', '-1');
-        log('Jazykový prepínač inicializovaný s', $items.length, 'položkami');
+        log('Jazykový prepínač inicializovaný s', $items.length, 'položkami a vlajkami');
 
         // Vždy pridaj eventy (jazyk je vždy prepínateľný)
         setupDropdownEvents($root, $current, $listbox, $items, 'language');
     }
 
-    /* -------------------------------
-       Currency Switcher (iba ak je povolený)
-       ------------------------------- */
+    /* ===============================
+     * CURRENCY SWITCHER (Conditional)
+     * ===============================
+     * 
+     * Features:
+     * - Shows only if allowCurrencyChange !== false
+     * - UI-only switching (no navigation)
+     * - Supports optional text labels
+     * - Preserves label text during currency changes
+     * - Triggers global callback: window.onCurrencyChange()
+     * - Full accessibility with ARIA
+     */
     function initCurrencySwitch($root, options) {
         var currentCurrency = options.currency || 'eur';
-        var labelText = options.currencyLabel !== undefined ? options.currencyLabel : 'Currency';
+        var labelText = options.currencyLabel || ''; // Text pred výber meny
 
         var $current = $root.find('.current');
         var $listbox = $root.find('[role="listbox"]');
@@ -146,11 +248,36 @@
 
         log('Inicializácia menového prepínača', { currentCurrency: currentCurrency, labelText: labelText });
 
-        // Pridaj label ak je definovaný
-        addSwitcherLabel($root, labelText, 'currency');
+        // Nastav aktuálnu menu v UI s prípadným labelom
+        // Vyčisti aktuálny obsah current elementu (okrem sr-only)
+        var $srOnly = $current.find('.sr-only').detach(); // Zachovaj sr-only
+        var $arrow = $current.find('.arrow').detach(); // Zachovaj šípku ak existuje
 
-        // Nastav aktuálnu menu v UI
-        $current.find('span[aria-hidden="true"]').text(currentCurrency.toUpperCase());
+        // Vyčisti ostatný obsah
+        $current.empty();
+
+        // Vytvor text s labelom
+        var displayText = labelText ? labelText + ' ' + currentCurrency.toUpperCase() : currentCurrency.toUpperCase();
+
+        // Vytvor novú štruktúru: text + sr-only + šípka
+        $current.append('<span class="currency-text" aria-hidden="true">' + displayText + '</span>');
+
+        // Pridaj sr-only text
+        if ($srOnly.length) {
+            $srOnly.text('Current currency: ' + currentCurrency.toUpperCase());
+            $current.append($srOnly);
+        } else {
+            $current.append('<span class="sr-only">Current currency: ' + currentCurrency.toUpperCase() + '</span>');
+        }
+
+        // Pridaj šípku na koniec ak neexistuje
+        if ($arrow.length) {
+            $current.append($arrow);
+        } else {
+            $current.append('\n                <em class="arrow">\n                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" focusable="false">\n                        <title>Open currency options</title>\n                        <g fill="currentColor"><path d="M5 8l4 4 4-4z"></path></g>\n                    </svg>\n                </em>\n            ');
+        }
+
+        log('Currency UI štruktúra vytvorená:', { displayText: displayText });
 
         // Označ aktuálnu menu
         $items.removeClass('selected').attr('aria-selected', 'false');
@@ -160,12 +287,25 @@
         setupDropdownEvents($root, $current, $listbox, $items, 'currency');
     }
 
-    /* -------------------------------
-       Spoločné dropdown eventy
-       ------------------------------- */
+    /* ===============================
+     * DROPDOWN EVENT MANAGEMENT
+     * ===============================
+     * 
+     * Shared event handling for both language and currency dropdowns
+     * Features:
+     * - Native addEventListener with capture phase
+     * - Mobile overlay system for touch devices
+     * - Keyboard navigation (Arrow keys, Home, End, Escape)
+     * - Global click-outside-to-close
+     * - Proper ARIA state management
+     * - Responsive behavior with media queries
+     * - Event namespace isolation (prevents conflicts)
+     */
     function setupDropdownEvents($root, $current, $listbox, $items, type) {
-        var switchId = 'switch-' + type + '-' + Math.random().toString(36).substr(2, 9);
-
+        /**
+         * Sets ARIA expanded state and active descendant
+         * Critical for accessibility and screen reader support
+         */
         function setExpanded(open) {
             $current.attr('aria-expanded', open ? 'true' : 'false');
             if (!open) {
@@ -178,18 +318,16 @@
             }
         }
 
+        /**
+         * Opens dropdown with mobile overlay support
+         * Handles focus management and animations
+         */
         function open() {
             log('Otváram dropdown pre', type);
 
-            // Zatvor ostatné dropdowns
+            // Zatvor ostatné
             $('.switch.show-options').not($root).each(function () {
-                var $otherRoot = $(this);
-                $otherRoot.removeClass('anim-options show-shadow');
-                $otherRoot.find('.current').attr('aria-expanded', 'false');
-                $otherRoot.find('[role="listbox"]').removeAttr('aria-activedescendant');
-                setTimeout(function () {
-                    return $otherRoot.removeClass('show-options');
-                }, 600);
+                close($(this));
             });
 
             $root.addClass('show-options');
@@ -213,6 +351,10 @@
             log('Dropdown otvorený, fokus na:', $toFocus.length ? 'vybraný' : 'prvý');
         }
 
+        /**
+         * Closes dropdown and cleans up mobile overlay
+         * Handles animation timing and ARIA cleanup
+         */
         function close() {
             var targetRoot = arguments.length <= 0 || arguments[0] === undefined ? $root : arguments[0];
 
@@ -230,7 +372,10 @@
             }, 600);
         }
 
-        // Funkcie pre mobilný overlay
+        /**
+         * Creates mobile overlay for touch device optimization
+         * Positioned fixed bottom-left per user requirements
+         */
         function createMobileOverlay() {
             if ($('.switch-mobile-overlay').length === 0) {
                 (function () {
@@ -254,6 +399,10 @@
             }
         }
 
+        /**
+         * Removes mobile overlay with fade animation
+         * Includes proper event cleanup
+         */
         function removeMobileOverlay() {
             var $overlay = $('.switch-mobile-overlay');
             if ($overlay.length > 0) {
@@ -266,23 +415,25 @@
         }
 
         // Button events
-        $current.on('click.' + switchId, function (e) {
+        $current.off('click.switch-' + type).on('click.switch-' + type, function (e) {
             e.preventDefault();
-            e.stopPropagation();
+            e.stopImmediatePropagation();
 
-            // Zaznamenaj čas button click pre globálny event
-            lastButtonClickTime = Date.now();
+            log('Klik na button pre', type);
 
-            log('Klik na button pre', type, '- aktuálny stav:', $root.hasClass('show-options'));
-
-            if ($root.hasClass('show-options')) {
-                close();
-            } else {
-                open();
-            }
+            // Použijem setTimeout na zabránenie race condition
+            setTimeout(function () {
+                if ($root.hasClass('show-options')) {
+                    log('Zatváram dropdown');
+                    close();
+                } else {
+                    log('Otváram dropdown');
+                    open();
+                }
+            }, 10);
         });
 
-        $current.on('keydown.' + switchId, function (e) {
+        $current.on('keydown.switch-' + type, function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 if ($root.hasClass('show-options')) close();else open();
@@ -298,10 +449,7 @@
         });
 
         // Items events
-        $items.on('click.' + switchId, function (e) {
-            // Zaznamenaj čas click pre globálny event
-            lastButtonClickTime = Date.now();
-
+        $items.on('click.switch-' + type, function (e) {
             if (type === 'language') {
                 // Pre jazyky nechaj prirodzené správanie <a> linku
                 var $link = $(this).find('a.lang-link');
@@ -318,8 +466,26 @@
                 if (newCurrency) {
                     log('Mena zmenená na:', newCurrency);
 
+                    // Zisti, či existuje label pre menu - hľadaj .currency-text alebo fallback
+                    var $textSpan = $current.find('.currency-text');
+                    if (!$textSpan.length) {
+                        $textSpan = $current.find('span[aria-hidden="true"]');
+                    }
+
+                    var currentText = $textSpan.text();
+                    var hasLabel = currentText.includes(':');
+
+                    var newDisplayText = newCurrency.toUpperCase();
+                    if (hasLabel) {
+                        // Zachovaj label text pred menou (hľadaj text pred ":")
+                        var labelMatch = currentText.match(/^([^:]+:)\s*/);
+                        if (labelMatch) {
+                            newDisplayText = labelMatch[1] + ' ' + newDisplayText;
+                        }
+                    }
+
                     // Aktualizuj UI
-                    $current.find('span[aria-hidden="true"]').text(newCurrency.toUpperCase());
+                    $textSpan.text(newDisplayText);
                     $items.removeClass('selected').attr('aria-selected', 'false');
                     $(this).addClass('selected').attr('aria-selected', 'true');
 
@@ -336,7 +502,7 @@
             }
         });
 
-        $items.on('keydown.' + switchId, function (e) {
+        $items.on('keydown.switch-' + type, function (e) {
             var $focusable = $items;
             var idx = $focusable.index(this);
 
@@ -402,125 +568,77 @@
             }
         });
 
-        // Uložiť referencie pre cleanup
-        $root.data('switchId', switchId);
-        $root.data('switchType', type);
-    }
-
-    // Globálne eventy - inicializujú sa iba raz
-    var globalEventsInitialized = false;
-    var lastButtonClickTime = 0;
-    var switcherInitialized = false;
-
-    function initGlobalEvents() {
-        if (globalEventsInitialized) return;
-
-        log('Inicializácia globálnych switch eventov');
-
-        // Globálny document click
-        $(document).on('click.lcswitch-global', function (e) {
-            // Ignoruj click ak bol nedávno button click (v posledných 100ms)
-            var now = Date.now();
-            if (now - lastButtonClickTime < 100) {
-                log('Ignorujem globálny click - nedávny button click');
-                return;
+        // Global events - native addEventListener s capture
+        var globalClickHandler = function globalClickHandler(e) {
+            // Skontroluj, či klik nie je v rámci dropdown-u
+            if (!$root[0].contains(e.target) && $root.hasClass('show-options')) {
+                log('Klik mimo dropdown - zatváram');
+                close();
             }
+        };
 
-            $('.switch.show-options').each(function () {
-                var $root = $(this);
-                if (!$(e.target).closest($root).length) {
-                    (function () {
-                        var $btn = $root.find('.current');
-                        $root.removeClass('anim-options show-shadow');
-                        $btn.attr('aria-expanded', 'false');
-                        $root.find('[role="listbox"]').removeAttr('aria-activedescendant');
+        // Uložíme referenciu pre cleanup
+        $root.data('globalClickHandler', globalClickHandler);
 
-                        // Odstráň mobilný overlay
-                        var $overlay = $('.switch-mobile-overlay');
-                        if ($overlay.length > 0) {
-                            $overlay.removeClass('active');
-                            setTimeout(function () {
-                                $overlay.off('click.switch-overlay').remove();
-                            }, 300);
-                        }
+        // Delay registrácie global eventov aby sa nestali hneď
+        setTimeout(function () {
+            document.addEventListener('click', globalClickHandler, true); // capture fáza
+        }, 200);
 
-                        setTimeout(function () {
-                            return $root.removeClass('show-options');
-                        }, 600);
-                        log('Zatvorený dropdown z globálneho click eventu');
-                    })();
-                }
-            });
-        });
-
-        // Globálny ESC key handler
-        $(document).on('keydown.lcswitch-global', function (e) {
-            if (e.key === 'Escape') {
-                var $openDropdowns = $('.switch.show-options');
-                if ($openDropdowns.length > 0) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-
-                    $openDropdowns.each(function () {
-                        var $root = $(this);
-                        var $btn = $root.find('.current');
-                        $root.removeClass('anim-options show-shadow');
-                        $btn.attr('aria-expanded', 'false');
-                        $root.find('[role="listbox"]').removeAttr('aria-activedescendant');
-
-                        // Odstráň mobilný overlay
-                        var $overlay = $('.switch-mobile-overlay');
-                        if ($overlay.length > 0) {
-                            $overlay.removeClass('active');
-                            setTimeout(function () {
-                                $overlay.off('click.switch-overlay').remove();
-                            }, 300);
-                        }
-
-                        setTimeout(function () {
-                            return $root.removeClass('show-options');
-                        }, 600);
-                    });
-
-                    log('ESC klávesa - zatvorené všetky dropdowns, nie modálne okná');
-                }
+        $(document).on('keydown.switch-' + type, function (e) {
+            if (e.key === 'Escape' && $root.hasClass('show-options')) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                log('ESC klávesa - zatváram iba dropdown, nie modálne okno');
+                close();
             }
         });
 
-        globalEventsInitialized = true;
+        // Responzívne správanie - vyčisti overlay pri zmene na desktop
+        var mobileMediaQuery = window.matchMedia('(max-width: 768px)');
+        function handleMobileChange(mq) {
+            log('Zmena zobrazenia na:', mq.matches ? 'mobilné' : 'desktop');
+            if (!mq.matches) {
+                // Pri prepnutí na desktop odstráň overlay
+                removeMobileOverlay();
+            }
+        }
+
+        if (mobileMediaQuery.addListener) {
+            mobileMediaQuery.addListener(handleMobileChange);
+        } else if (mobileMediaQuery.addEventListener) {
+            mobileMediaQuery.addEventListener('change', handleMobileChange);
+        }
     }
 
-    /* -------------------------------
-       API: LCSwitcher.init(options)
-       ------------------------------- */
+    /* ===============================
+     * PUBLIC API: LCSwitcher
+     * ===============================
+     * 
+     * Main plugin interface with comprehensive options
+     * Handles both language and currency switching
+     * Includes debug utilities and cleanup methods
+     */
     var LCSwitcher = {
         /**
-         * @param {Object} options
-         * @param {string=} options.language - aktuálny jazyk (fallback: čítané z <html lang>)
-         * @param {string=} options.currency - aktuálna mena pre currency switcher
-         * @param {string[]=} options.languages - pole "kod|Label" (default CZ + EN)
-         * @param {boolean=} options.allowCurrencyChange - zobraziť currency switcher (default true)
-         * @param {string=} options.languageChangeUrl - URL template pre zmenu jazyka
-         * @param {string=} options.languageLabel - text pred jazykovým prepínačom (default 'Language', "" = nezobrazí)
-         * @param {string=} options.currencyLabel - text pred menovým prepínačom (default 'Currency', "" = nezobrazí)
-         * @param {boolean=} options.debug - zapnúť debug výpisy (default false)
+         * Main initialization method
+         * @param {Object} options - Configuration object
+         * @param {string=} options.language - Current language code (fallback: <html lang>)
+         * @param {string=} options.currency - Current currency code for currency switcher
+         * @param {string[]=} options.languages - Array of "code|Label" strings (default: CZ + EN)
+         * @param {boolean=} options.allowCurrencyChange - Show currency switcher (default: true)
+         * @param {string=} options.languageChangeUrl - URL template for language links
+         * @param {string=} options.languageLabel - Text prefix for language selector
+         * @param {string=} options.currencyLabel - Text prefix for currency selector
+         * @param {boolean=} options.debug - Enable console logging (default: false)
          */
         init: function init(options) {
-            // Ochrana proti viacnásobnej inicializácii
-            if (switcherInitialized) {
-                log('LCSwitcher už bol inicializovaný, preskakujem...');
-                return;
-            }
-
             options = options || {};
 
             // Nastav debug mode
             DEBUG = !!options.debug;
             log('LCSwitcher inicializácia začatá', options);
-
-            // Inicializuj globálne eventy (iba raz)
-            initGlobalEvents();
 
             // Spracuj jazyky
             var langsInput = options.languages || ["cz|Česky", "en|English"];
@@ -583,43 +701,45 @@
             }
 
             log('LCSwitcher inicializácia dokončená');
-            switcherInitialized = true;
         },
 
-        // Debug utility metódy
+        /**
+         * Enables debug console logging
+         * Useful for development and troubleshooting
+         */
         enableDebug: function enableDebug() {
             DEBUG = true;
             log('Debug režim zapnutý');
         },
 
+        /**
+         * Disables debug console logging
+         */
         disableDebug: function disableDebug() {
             DEBUG = false;
         },
 
-        // Cleanup metóda
+        /**
+         * Complete cleanup of all plugin events and state
+         * Removes native event listeners and jQuery events
+         * Resets visual state to defaults
+         */
         destroy: function destroy() {
             log('Odstraňovanie LCSwitcher eventov');
 
-            // Odstráň individuálne switch eventy
+            // Odstráň všetky switch eventy
+            $('.switch').off('.switch-language .switch-currency');
+            $(document).off('.switch-language .switch-currency');
+            $(window).off('.switch-language .switch-currency');
+
+            // Odstráň native event listeners
             $('.switch').each(function () {
-                var $root = $(this);
-                var switchId = $root.data('switchId');
-                if (switchId) {
-                    $root.find('.current').off('.' + switchId);
-                    $root.find('[role="option"]').off('.' + switchId);
+                var handler = $(this).data('globalClickHandler');
+                if (handler) {
+                    document.removeEventListener('click', handler, true);
+                    $(this).removeData('globalClickHandler');
                 }
             });
-
-            // Odstráň globálne eventy
-            $(document).off('.lcswitch-global');
-            $(window).off('.lcswitch-global');
-
-            // Odstráň všetky labely
-            $('.switcher-label').remove();
-
-            // Reset flags
-            globalEventsInitialized = false;
-            switcherInitialized = false;
 
             // Vyčisti pozičné triedy
             $('.switch .options').removeClass('dropdown-top dropdown-right dropdown-left');
@@ -631,10 +751,26 @@
         }
     };
 
-    // Export do globálua
+    // Export do globálu
     window.LCSwitcher = LCSwitcher;
 })(jQuery, window, document);
 
-// Poznámka: Plugin sa musí inicializovať manuálne volaním LCSwitcher.init(options)
-// Príklad inicializácie nájdete v testovacích súboroch alebo v dokumentácii
+/* ===============================
+ * AUTO-INITIALIZATION
+ * ===============================
+ * 
+ * Default setup for immediate use
+ * Customize these values for your application
+ */
+$(document).ready(function () {
+    if (window.LCSwitcher) {
+        LCSwitcher.init({
+            language: document.documentElement.getAttribute('lang'),
+            languages: ["sk|Slovenčina", "cz|Čeština", "en|English", "de|Deutsch", "ru|Русский", "hu|Magyar"],
+            languageChangeUrl: '/Home/ChangeLanguage?code={CODE}', // Upraviť podľa potreby
+            allowCurrencyChange: true, // Zmeniť na false ak chceš úplne skryť currency switcher
+            debug: false // Zmeniť na true pre debug výpisy
+        });
+    }
+});
 

@@ -1,6 +1,132 @@
-﻿$font-primary: 'Noto Sans', Arial, sans-serif;
-$color-primary: #3498DB;
-$color-dark: #313436;
+/*
+ * Language & Currency Switcher SCSS
+ * ==================================
+ * 
+ * COMPLETE CSS CUSTOM PROPERTIES SYSTEM
+ * Features 67 CSS variables with --tp-lang-switcher- prefix
+ * Full theming control for colors, sizes, fonts, transitions, z-index
+ * 
+ * FLAG INTEGRATION
+ * Supports SVG flags from ~/Content/flags/4x3/*.svg
+ * Automatic flag generation for 15+ countries
+ * 
+ * MOBILE OPTIMIZATION  
+ * Fixed bottom-left positioning as requested
+ * Touch-friendly overlay system
+ * Responsive breakpoints at 768px
+ * 
+ * ACCESSIBILITY
+ * Full ARIA support, screen reader text
+ * Focus management and keyboard navigation
+ * High contrast and reduced motion support
+ * 
+ * COMPILE TO: switcher-lang-currency-orso.css
+ */
+
+// CSS Custom Properties (CSS Variables) s prefixom --tp-lang-switcher-
+:root {
+    // === FARBY ===
+    --tp-lang-switcher-primary-color: #3498DB;
+    --tp-lang-switcher-text-color: #313436;
+    --tp-lang-switcher-text-color-hover: #262f39;
+    --tp-lang-switcher-bg-color: #ffffff;
+    --tp-lang-switcher-bg-hover: rgba(0, 0, 0, 0.05);
+    --tp-lang-switcher-border-color: #E1E4E6;
+    --tp-lang-switcher-shadow-color: rgba(0, 0, 0, 0.4);
+    --tp-lang-switcher-overlay-color: rgba(0, 0, 0, 0.4);
+    
+    // === ROZMĚRY ===
+    --tp-lang-switcher-switch-height: 42px;
+    --tp-lang-switcher-switch-gap: 8px;
+    --tp-lang-switcher-border-radius: 3px;
+    --tp-lang-switcher-border-radius-large: 8px;
+    --tp-lang-switcher-border-width: 1px;
+    --tp-lang-switcher-switch-padding: 2px 4px;
+    --tp-lang-switcher-current-padding: 0 0.2em 0 0.7em;
+    --tp-lang-switcher-arrow-size: 20px;
+    
+    // === FONT ===
+    --tp-lang-switcher-font-family: 'Noto Sans', Arial, sans-serif;
+    --tp-lang-switcher-font-size: 1rem;
+    --tp-lang-switcher-label-font-size: 0.9rem;
+    --tp-lang-switcher-label-font-size-mobile: 0.8rem;
+    --tp-lang-switcher-font-weight: 400;
+    --tp-lang-switcher-label-font-weight: 500;
+    --tp-lang-switcher-line-height: 1;
+    
+    // === TRANSITIONS ===
+    --tp-lang-switcher-transition-fast: 0.2s ease-out;
+    --tp-lang-switcher-transition-medium: 0.3s ease-out;
+    --tp-lang-switcher-transition-slow: 0.36s ease-out;
+    --tp-lang-switcher-transition-mobile: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --tp-lang-switcher-transition-list-item: all .24s ease-out;
+    
+    // === Z-INDEX ===
+    --tp-lang-switcher-z-index-current: 2;
+    --tp-lang-switcher-z-index-options: 5;
+    --tp-lang-switcher-z-index-mobile-overlay: 9990;
+    --tp-lang-switcher-z-index-mobile-options: 10000;
+    --tp-lang-switcher-z-index-mobile-list: 10001;
+    --tp-lang-switcher-z-index-overlay: 9990;
+    --tp-lang-switcher-z-index-overlay-active: 1000;
+    --tp-lang-switcher-z-index-focus: 1001;
+    --tp-lang-switcher-z-index-list: 5;
+    --tp-lang-switcher-z-index-mobile: 10000;
+    
+    // === MOBILE BREAKPOINT ===
+    --tp-lang-switcher-mobile-breakpoint: 768px;
+    --tp-lang-switcher-mobile-font-size: 0.8rem;
+    --tp-lang-switcher-mobile-height: 38px;
+    --tp-lang-switcher-mobile-min-width: 250px;
+    --tp-lang-switcher-mobile-max-width: 90vw;
+    --tp-lang-switcher-mobile-padding: 10px;
+    --tp-lang-switcher-mobile-list-padding: 1rem;
+    --tp-lang-switcher-mobile-list-min-width: 220px;
+    --tp-lang-switcher-mobile-list-item-padding: 1rem 1.25rem;
+    
+    // === MOBILE LCS-WITCHES POZÍCIOVANIE ===
+    --tp-lang-switcher-mobile-switches-bottom: 20px;
+    --tp-lang-switcher-mobile-switches-left: 20px;
+    --tp-lang-switcher-mobile-switches-gap: 15px;
+    --tp-lang-switcher-z-index-mobile-switches: 9995;
+    
+    // === FOCUS ===
+    --tp-lang-switcher-focus-color: rgba(52, 152, 219, 0.6);
+    --tp-lang-switcher-focus-width: 2px;
+    --tp-lang-switcher-focus-offset: 2px;
+    --tp-lang-switcher-focus-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+    --tp-lang-switcher-focus-border-color: #3498DB;
+    
+    // === OPTIONS LIST ===
+    --tp-lang-switcher-list-padding: .4rem 0.8em;
+    --tp-lang-switcher-list-min-width: 10rem;
+    --tp-lang-switcher-list-font-size: 1rem;
+    --tp-lang-switcher-list-item-padding: 0.75em;
+    --tp-lang-switcher-list-border-color: #E1E4E6;
+    --tp-lang-switcher-list-hover-bg: rgba(0,0,0,.04);
+    --tp-lang-switcher-list-selected-weight: 600;
+    --tp-lang-switcher-list-delay: .1s;
+    
+    // === MOBILE OVERLAY ===
+    --tp-lang-switcher-overlay-bg: rgba(0, 0, 0, 0.4);
+    
+    // === SHADOWS ===
+    --tp-lang-switcher-shadow-mobile: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    // === VLAJKY ===
+    --tp-lang-switcher-flag-size: 20px;
+    --tp-lang-switcher-flag-size-mobile: 18px;
+    --tp-lang-switcher-flag-border-radius: 2px;
+    --tp-lang-switcher-flag-path: '/Content/flags/4x3/';
+}
+
+// SCSS premenné (pre kompatibilitu s existujúcim kódom)
+$font-primary: var(--tp-lang-switcher-font-family);
+$color-primary: var(--tp-lang-switcher-primary-color);
+$color-dark: var(--tp-lang-switcher-text-color);
+
+// SCSS premenná pre mobilný breakpoint (CSS premenné nefungujú v @media)
+$mobile-breakpoint: 768px;
 
 .modal-header.modal-header-v2 {
     display: flex;
@@ -11,83 +137,175 @@ $color-dark: #313436;
     }
 }
 
+// Container pre switch s labelom
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: var(--tp-lang-switcher-switch-gap);
+    transition: background-color var(--tp-lang-switcher-transition-fast);
+    
+    &:hover {
+        .switch-label {
+            color: var(--tp-lang-switcher-text-color-hover);
+        }
+    }
+}
+
+// Label pre switch
+.switch-label {
+    font-size: var(--tp-lang-switcher-label-font-size);
+    color: var(--tp-lang-switcher-text-color);
+    font-weight: var(--tp-lang-switcher-label-font-weight);
+    white-space: nowrap;
+    user-select: none;
+    line-height: var(--tp-lang-switcher-line-height);
+    cursor: pointer;
+    transition: color var(--tp-lang-switcher-transition-fast);
+    
+    // Responzívne správanie
+    @media (max-width: $mobile-breakpoint) {
+        font-size: var(--tp-lang-switcher-label-font-size-mobile);
+    }
+}
+
+// === VLAJKY ===
+.flag-icon {
+    display: inline-block;
+    width: var(--tp-lang-switcher-flag-size);
+    height: calc(var(--tp-lang-switcher-flag-size) * 0.75); // 4:3 aspect ratio
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: var(--tp-lang-switcher-flag-border-radius);
+    flex-shrink: 0;
+    vertical-align: middle;
+    
+    // Mobilné zobrazenie - menšie vlajky
+    @media (max-width: $mobile-breakpoint) {
+        width: var(--tp-lang-switcher-flag-size-mobile);
+        height: calc(var(--tp-lang-switcher-flag-size-mobile) * 0.75);
+    }
+}
+
+// Generovanie flagov pre základné jazyky
+.flag-icon-sk { background-image: url('../../flags/4x3/sk.svg'); }
+.flag-icon-en, .flag-icon-gb { background-image: url('../../flags/4x3/gb.svg'); }
+.flag-icon-us { background-image: url('../../flags/4x3/us.svg'); }
+.flag-icon-de { background-image: url('../../flags/4x3/de.svg'); }
+.flag-icon-fr { background-image: url('../../flags/4x3/fr.svg'); }
+.flag-icon-es { background-image: url('../../flags/4x3/es.svg'); }
+.flag-icon-it { background-image: url('../../flags/4x3/it.svg'); }
+.flag-icon-ru { background-image: url('../../flags/4x3/ru.svg'); }
+.flag-icon-pl { background-image: url('../../flags/4x3/pl.svg'); }
+.flag-icon-cz { background-image: url('../../flags/4x3/cz.svg'); }
+.flag-icon-hu { background-image: url('../../flags/4x3/hu.svg'); }
+.flag-icon-at { background-image: url('../../flags/4x3/at.svg'); }
+.flag-icon-ch { background-image: url('../../flags/4x3/ch.svg'); }
+.flag-icon-nl { background-image: url('../../flags/4x3/nl.svg'); }
+.flag-icon-be { background-image: url('../../flags/4x3/be.svg'); }
+
 .switch {
     position: relative;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px; // Medzera medzi labelom a switcherom
-}
-
-.switcher-label {
-    font-size: 0.9rem;
-    color: $color-dark;
-    font-weight: 500;
-    white-space: nowrap;
-    user-select: none;
-    line-height: 1;
+    gap: var(--tp-lang-switcher-switch-gap);
+    border-radius: var(--tp-lang-switcher-border-radius);
+    padding: var(--tp-lang-switcher-switch-padding);
+    transition: background-color var(--tp-lang-switcher-transition-fast);
+    color: var(--tp-lang-switcher-text-color); // DÔLEŽITÉ: nastavenie farby textu
+    border: var(--tp-lang-switcher-border-width) solid var(--tp-lang-switcher-border-color);
     
-    // Responzívne správanie
-    @media (max-width: 768px) {
-        font-size: 0.8rem;
+    &:hover {
+        background-color: var(--tp-lang-switcher-bg-hover);
+        
+        .switch-label {
+            color: var(--tp-lang-switcher-text-color-hover);
+        }
+        
+        .current {
+            color: var(--tp-lang-switcher-text-color-hover);
+        }
     }
 }
 
 .current {
-    $size: 42px;
-
     text-transform: uppercase;
-    height: $size;
+    height: var(--tp-lang-switcher-switch-height);
     position: relative;
-    z-index: 2; // nad options
-    font-size: 1rem;
+    z-index: var(--tp-lang-switcher-z-index-current);
+    font-size: var(--tp-lang-switcher-font-size);
     text-align: center;
-    line-height: $size;
+    line-height: var(--tp-lang-switcher-switch-height);
     display: flex;
+    align-items: center;
+    gap: var(--tp-lang-switcher-switch-gap);
     background-color: rgba(0, 0, 0, 0);
-    transition: all .2s ease-out;
-    border-radius: 3px;
-    padding: 0 .2em 0 .7em;
+    transition: all var(--tp-lang-switcher-transition-fast);
+    border-radius: var(--tp-lang-switcher-border-radius);
+    padding: var(--tp-lang-switcher-current-padding);
+    color: var(--tp-lang-switcher-text-color); // DÔLEŽITÉ: farba textu
+
+    .flag-icon {
+        margin-right: 0; // Gap už je nastavený cez flexbox
+    }
+
+    .text {
+        display: inline-block;
+        line-height: var(--tp-lang-switcher-line-height);
+        user-select: none;
+        flex: 1;
+    }
+
+    .dropdown-arrow {
+        display: inline-block;
+        font-size: 0.8em;
+        opacity: 0.7;
+        transition: transform var(--tp-lang-switcher-transition-fast);
+        
+        .switch.show-options & {
+            transform: rotate(180deg);
+        }
+    }
 
     span {
         display: inline-block;
-        line-height: 1;
-        padding: .7em .2em 0 0;
+        line-height: var(--tp-lang-switcher-line-height);
         user-select: none;
     }
 
     .arrow {
         display: inline-block;
-        width: 20px;
-        height: 20px;
-        flex: 0 0 20px;
+        width: var(--tp-lang-switcher-arrow-size);
+        height: var(--tp-lang-switcher-arrow-size);
+        flex: 0 0 var(--tp-lang-switcher-arrow-size);
     }
 
     &:hover {
-        background-color: rgba(0, 0, 0, .08);
+        background-color: var(--tp-lang-switcher-bg-hover);
     }
 
     &:focus {
-        outline: 2px solid rgba(52,152,219,.6);
-        outline-offset: 2px;
+        outline: var(--tp-lang-switcher-focus-width) solid var(--tp-lang-switcher-focus-color);
+        outline-offset: var(--tp-lang-switcher-focus-offset);
     }
 }
 
 .options {
     position: absolute;
     right: 0;
-    top: .6em;
+    top: 4.1em;
     z-index: 0;
     opacity: 0;
-    transition: all .36s ease-out;
+    transition: all var(--tp-lang-switcher-transition-slow);
     display: none;
     overflow: hidden;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-    background: #fff;
+    background: var(--tp-lang-switcher-bg-color);
 
     .switch.show-options & {
         display: block;
-        z-index: 5;
+        z-index: var(--tp-lang-switcher-z-index-options);
     }
 
     .switch.anim-options & {
@@ -95,25 +313,25 @@ $color-dark: #313436;
     }
 
     .switch.show-shadow & {
-        box-shadow: 0 2px 12px -4px rgba(0, 0, 0, .4);
+        box-shadow: 0 2px 12px -4px var(--tp-lang-switcher-shadow-color);
     }
 
     // Mobilné zobrazenie - centrovanie na obrazovku
-    @media (max-width: 768px) {
+    @media (max-width: $mobile-breakpoint) {
         position: fixed;
         left: 50%;
         top: 50%;
         right: auto;
         transform: translate(-50%, -50%);
-        z-index: 10000; // Vyšší z-index ako overlay (9990)
-        min-width: 250px;
-        max-width: 90vw;
-        border-radius: 8px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        z-index: var(--tp-lang-switcher-z-index-mobile); // Vyšší z-index ako overlay (9990)
+        min-width: var(--tp-lang-switcher-mobile-min-width);
+        max-width: var(--tp-lang-switcher-mobile-max-width);
+        border-radius: var(--tp-lang-switcher-border-radius-large);
+        box-shadow: var(--tp-lang-switcher-shadow-mobile);
 
         .switch.show-options & {
             display: block;
-            z-index: 10000; // Konzistentný z-index
+            z-index: var(--tp-lang-switcher-z-index-mobile); // Konzistentný z-index
         }
 
         .switch.anim-options & {
@@ -122,27 +340,35 @@ $color-dark: #313436;
         }
 
         .switch.show-shadow & {
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--tp-lang-switcher-shadow-mobile);
         }
 
         // Počiatočný stav pre animáciu
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.9);
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        transition: all var(--tp-lang-switcher-transition-mobile);
     }
 }
 
 // Mobilný overlay pre lepšiu UX
-@media (max-width: 768px) {
+@media (max-width: $mobile-breakpoint) {
     .lc-switches {
-        position: absolute;
-        bottom: 0;
-        background: #fff;
-        padding: 10px;
-        -moz-border-radius: inherit;
-        -webkit-border-radius: inherit;
-        border-radius: inherit;
-        //z-index: 9999;  
+        position: fixed;
+        bottom: var(--tp-lang-switcher-mobile-switches-bottom);
+        left: var(--tp-lang-switcher-mobile-switches-left);
+        background: var(--tp-lang-switcher-bg-color);
+        padding: var(--tp-lang-switcher-mobile-padding);
+        border-radius: var(--tp-lang-switcher-border-radius);
+        box-shadow: var(--tp-lang-switcher-shadow-mobile);
+        z-index: var(--tp-lang-switcher-z-index-mobile-switches);
+        
+        // Flexbox rozloženie pre horizontálne zarovnanie switcherov
+        display: flex;
+        gap: var(--tp-lang-switcher-mobile-switches-gap);
+        align-items: center;
+        
+        // Malé zaoblenie pre lepší vzhľad
+        border: var(--tp-lang-switcher-border-width) solid var(--tp-lang-switcher-border-color);
     }
     
     // Skutočný overlay element pre mobilné zobrazenie
@@ -152,57 +378,74 @@ $color-dark: #313436;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: 9990; // Nižší z-index ako dropdown
+        background: var(--tp-lang-switcher-overlay-bg);
+        z-index: var(--tp-lang-switcher-z-index-overlay); // Nižší z-index ako dropdown
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity var(--tp-lang-switcher-transition-slow);
         pointer-events: none;
          
         &.active {
             opacity: 1;
             pointer-events: auto;
-            z-index: 1000;
+            z-index: var(--tp-lang-switcher-z-index-overlay-active);
         }
     }
 }
 
 .options-list {
-    color: $color-dark;
+    color: var(--tp-lang-switcher-text-color);
     margin: 0;
-    padding: .4rem 0.8em;
+    padding: var(--tp-lang-switcher-list-padding);
     position: relative;
-    z-index: 5;
-    min-width: 10rem;
+    z-index: var(--tp-lang-switcher-z-index-list);
+    min-width: var(--tp-lang-switcher-list-min-width);
 
     // Mobilné zobrazenie - väčší padding a lepšie touch targets
-    @media (max-width: 768px) {
-        padding: 1rem;
-        min-width: 220px;
-        z-index: 10001; // Vyšší z-index ako overlay a options container
+    @media (max-width: $mobile-breakpoint) {
+        padding: var(--tp-lang-switcher-mobile-list-padding);
+        min-width: var(--tp-lang-switcher-mobile-list-min-width);
+        z-index: var(--tp-lang-switcher-z-index-mobile-list); // Vyšší z-index ako overlay a options container
     }
 
     li {
         list-style: none;
         margin: 0;
-        padding: 0.75em;
-        border-bottom: 1px solid #E1E4E6;
+        padding: var(--tp-lang-switcher-list-item-padding);
+        border-bottom: var(--tp-lang-switcher-border-width) solid var(--tp-lang-switcher-list-border-color);
         transform: translateX(10px);
-        transition: all .24s ease-out;
-        transition-delay: .1s;
+        transition: all var(--tp-lang-switcher-transition-list-item);
+        transition-delay: var(--tp-lang-switcher-list-delay);
         opacity: 0;
-        font-size: 1rem;
-        line-height: 1.3;
+        font-size: var(--tp-lang-switcher-list-font-size);
+        line-height: var(--tp-lang-switcher-line-height);
         white-space: nowrap;
-        background: #fff;
+        background: var(--tp-lang-switcher-bg-color);
+
+        // Layout pre vlajky v options
+        .lang-link, .currency-link {
+            display: flex;
+            align-items: center;
+            gap: var(--tp-lang-switcher-switch-gap);
+            color: inherit;
+            text-decoration: none;
+            
+            .flag-icon {
+                flex-shrink: 0;
+            }
+            
+            .text {
+                flex: 1;
+            }
+        }
 
         // Mobilné zobrazenie - väčší touch target
-        @media (max-width: 768px) {
-            padding: 1rem 1.25rem;
-            font-size: 1.1rem;
+        @media (max-width: $mobile-breakpoint) {
+            padding: var(--tp-lang-switcher-mobile-list-item-padding);
+            font-size: var(--tp-lang-switcher-mobile-font-size);
             
             &:hover,
             &:focus {
-                background: rgba(0,0,0,.08);
+                background: var(--tp-lang-switcher-bg-hover);
             }
         }
 
@@ -237,13 +480,13 @@ $color-dark: #313436;
 
         &:hover,
         &:focus {
-            background: rgba(0,0,0,.04);
+            background: var(--tp-lang-switcher-list-hover-bg);
             outline: none;
         }
 
         &.selected {
-            color: $color-primary;
-            font-weight: 600;
+            color: var(--tp-lang-switcher-primary-color);
+            font-weight: var(--tp-lang-switcher-list-selected-weight);
         }
 
         .switch.anim-options & {
