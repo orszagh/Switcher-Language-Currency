@@ -183,6 +183,9 @@
 .options-list li:nth-child(5) {
   transition-delay: 0.3s;
 }
+.options-list li:nth-child(5) {
+  transition-delay: 0.35s;
+}
 .options-list li:hover, .options-list li:focus {
   background: rgba(0, 0, 0, 0.04);
   outline: none;

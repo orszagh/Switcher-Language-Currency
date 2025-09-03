@@ -358,6 +358,7 @@
     // Globálne eventy - inicializujú sa iba raz
     let globalEventsInitialized = false;
     let lastButtonClickTime = 0;
+    let switcherInitialized = false;
     
     function initGlobalEvents() {
         if (globalEventsInitialized) return;
@@ -446,6 +447,12 @@
          * @param {boolean=} options.debug - zapnúť debug výpisy (default false)
          */
         init(options) {
+            // Ochrana proti viacnásobnej inicializácii
+            if (switcherInitialized) {
+                log('LCSwitcher už bol inicializovaný, preskakujem...');
+                return;
+            }
+            
             options = options || {};
 
             // Nastav debug mode
@@ -515,6 +522,7 @@
             }
 
             log('LCSwitcher inicializácia dokončená');
+            switcherInitialized = true;
         },
 
         // Debug utility metódy
@@ -545,8 +553,9 @@
             $(document).off('.lcswitch-global');
             $(window).off('.lcswitch-global');
             
-            // Reset flag
+            // Reset flags
             globalEventsInitialized = false;
+            switcherInitialized = false;
             
             // Vyčisti pozičné triedy
             $('.switch .options').removeClass('dropdown-top dropdown-right dropdown-left');
@@ -563,21 +572,5 @@
 
 })(jQuery, window, document);
 
-$(document).ready(function () {
-    if (window.LCSwitcher) {
-        LCSwitcher.init({
-            language: document.documentElement.getAttribute('lang'),
-            languages: [
-                "sk|Slovenčina",
-                "cz|Čeština",
-                "en|English",
-                "de|Deutsch",
-                "ru|Русский",
-                "hu|Magyar"
-            ],
-            languageChangeUrl: '/Home/ChangeLanguage?code={CODE}', // Upraviť podľa potreby
-            allowCurrencyChange: true, // Zmeniť na false ak chceš úplne skryť currency switcher
-            debug: false // Zmeniť na true pre debug výpisy
-        });
-    }
-});
+// Poznámka: Plugin sa musí inicializovať manuálne volaním LCSwitcher.init(options)
+// Príklad inicializácie nájdete v testovacích súboroch alebo v dokumentácii

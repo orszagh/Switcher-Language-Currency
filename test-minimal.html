@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Dropdown Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .test-switch {
+            position: relative;
+            display: inline-block;
+            margin: 20px;
+        }
+        .test-button {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            cursor: pointer;
+        }
+        .test-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ccc;
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+        .test-dropdown.show {
+            display: block;
+        }
+        .test-item {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .test-item:hover {
+            background: #f0f0f0;
+        }
+        #log {
+            background: #333;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Minimal Dropdown Test</h1>
+    <p>Testuje sa iba základná funkcionalita bez komplikovaných event handlerov.</p>
+    
+    <div class="test-switch">
+        <button class="test-button">Klikni ma</button>
+        <div class="test-dropdown">
+            <div class="test-item">Možnosť 1</div>
+            <div class="test-item">Možnosť 2</div>
+            <div class="test-item">Možnosť 3</div>
+        </div>
+    </div>
+    
+    <div>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="manualToggle()">Manual Toggle</button>
+    </div>
+    
+    <div id="log"></div>
+
+    <script>
+        let eventCounter = 0;
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.textContent += `${time} [${++eventCounter}]: ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        $(document).ready(function() {
+            log('=== Inicializácia ===');
+            
+            const $switch = $('.test-switch');
+            const $button = $('.test-button');
+            const $dropdown = $('.test-dropdown');
+            
+            // Button click event
+            $button.on('click', function(e) {
+                log('BUTTON CLICK - začiatok');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isOpen = $dropdown.hasClass('show');
+                log('Dropdown je aktuálne: ' + (isOpen ? 'OTVORENÝ' : 'ZATVORENÝ'));
+                
+                if (isOpen) {
+                    $dropdown.removeClass('show');
+                    log('BUTTON CLICK - zatvárám dropdown');
+                } else {
+                    $dropdown.addClass('show');
+                    log('BUTTON CLICK - otváram dropdown');
+                }
+                
+                log('BUTTON CLICK - koniec');
+            });
+            
+            // Document click event  
+            $(document).on('click', function(e) {
+                log('DOCUMENT CLICK - začiatok');
+                
+                const $target = $(e.target);
+                const isInsideSwitch = $target.closest('.test-switch').length > 0;
+                
+                log('Klik je v switchi: ' + (isInsideSwitch ? 'ÁNO' : 'NIE'));
+                
+                if (!isInsideSwitch && $dropdown.hasClass('show')) {
+                    log('DOCUMENT CLICK - zatvárám dropdown (klik mimo)');
+                    $dropdown.removeClass('show');
+                } else {
+                    log('DOCUMENT CLICK - nič nerobím');
+                }
+                
+                log('DOCUMENT CLICK - koniec');
+            });
+            
+            // Item click events
+            $('.test-item').on('click', function(e) {
+                log('ITEM CLICK - ' + $(this).text());
+                e.stopPropagation();
+                $dropdown.removeClass('show');
+            });
+            
+            log('=== Eventy nastavené ===');
+        });
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+            eventCounter = 0;
+        }
+        
+        function manualToggle() {
+            const $dropdown = $('.test-dropdown');
+            $dropdown.toggleClass('show');
+            log('MANUAL TOGGLE - ' + ($dropdown.hasClass('show') ? 'OTVORENÉ' : 'ZATVORENÉ'));
+        }
+    </script>
+</body>
+</html>
