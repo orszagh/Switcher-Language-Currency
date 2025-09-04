@@ -1,4 +1,4 @@
-@charset "UTF-8";
+﻿@charset "UTF-8";
 /*
  * Prepínač jazykov a mien SCSS
  * =============================
@@ -27,7 +27,7 @@
   --tp-lang-switcher-primary-color: #3498DB;
   --tp-lang-switcher-text-color: #313436;
   --tp-lang-switcher-text-color-hover: #262f39;
-  --tp-lang-switcher-bg-color: #ffffff;
+  --tp-lang-switcher-bg-color: #f4f6f9;
   --tp-lang-switcher-bg-hover: rgba(0, 0, 0, 0.05);
   --tp-lang-switcher-border-color: #E1E4E6;
   --tp-lang-switcher-shadow-color: rgba(0, 0, 0, 0.4);
@@ -318,6 +318,9 @@
     max-width: var(--tp-lang-switcher-mobile-max-width);
     border-radius: var(--tp-lang-switcher-border-radius-large);
     box-shadow: var(--tp-lang-switcher-shadow-mobile);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+    transition: all var(--tp-lang-switcher-transition-mobile);
   }
   .switch.show-options .options {
     display: block;
@@ -329,11 +332,6 @@
   }
   .switch.show-shadow .options {
     box-shadow: var(--tp-lang-switcher-shadow-mobile);
-  }
-  .options {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-    transition: all var(--tp-lang-switcher-transition-mobile);
   }
 }
 

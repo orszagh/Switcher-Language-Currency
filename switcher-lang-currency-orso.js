@@ -442,15 +442,18 @@
         $current.on(`keydown.switch-${type}`, function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                e.stopPropagation();
                 if ($root.hasClass('show-options')) close();
                 else open();
             }
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                 e.preventDefault();
+                e.stopPropagation();
                 open();
             }
             if (e.key === 'Escape') {
                 e.preventDefault();
+                e.stopPropagation();
                 close();
             }
         });
@@ -515,6 +518,7 @@
 
             if (e.key === 'Escape') {
                 e.preventDefault();
+                e.stopPropagation();
                 close();
                 $current.focus();
                 return;
@@ -522,6 +526,7 @@
 
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
+                e.stopPropagation();
                 const next = (idx + 1) % $focusable.length;
                 const $next = $focusable.eq(next).focus();
                 if ($next.attr('id')) {
@@ -532,6 +537,7 @@
 
             if (e.key === 'ArrowUp') {
                 e.preventDefault();
+                e.stopPropagation();
                 const prev = (idx - 1 + $focusable.length) % $focusable.length;
                 const $prev = $focusable.eq(prev).focus();
                 if ($prev.attr('id')) {
@@ -542,6 +548,7 @@
 
             if (e.key === 'Home') {
                 e.preventDefault();
+                e.stopPropagation();
                 const $first = $focusable.first().focus();
                 if ($first.attr('id')) {
                     $listbox.attr('aria-activedescendant', $first.attr('id'));
@@ -551,6 +558,7 @@
 
             if (e.key === 'End') {
                 e.preventDefault();
+                e.stopPropagation();
                 const $last = $focusable.last().focus();
                 if ($last.attr('id')) {
                     $listbox.attr('aria-activedescendant', $last.attr('id'));
@@ -560,12 +568,17 @@
 
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
 
                 if (type === 'language') {
                     const $link = $(this).find('a.lang-link');
                     if ($link.length) {
                         log('Jazyk vybraný cez klávesnicu:', $link.attr('href'));
-                        $link[0].click(); // Prirodzený klik na link
+                        // Zabráň okamžitému zatvoreniu dropdown-u pred kliknutím
+                        setTimeout(() => {
+                            $link[0].click(); // Prirodzený klik na link
+                        }, 50);
                     }
                 } else {
                     // Currency handling
@@ -579,6 +592,11 @@
         let globalClickHandler = function(e) {
             // Skontroluj, či klik nie je v rámci dropdown-u
             if (!$root[0].contains(e.target) && $root.hasClass('show-options')) {
+                // Dodatočná ochrana - skontroluj či event nie je synthesized z klávesnice
+                if (e.isTrusted === false || e.clientX === 0 && e.clientY === 0) {
+                    log('Ignorujem keyboard-triggered click event');
+                    return;
+                }
                 log('Klik mimo dropdown - zatváram');
                 close();
             }
@@ -592,15 +610,18 @@
             document.addEventListener('click', globalClickHandler, true); // capture fáza
         }, 200);
 
-        $(document).on(`keydown.switch-${type}`, function (e) {
-            if (e.key === 'Escape' && $root.hasClass('show-options')) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                log('ESC klávesa - zatváram iba dropdown, nie modálne okno');
-                close();
-            }
-        });
+        // Delay registrácie keyboard eventov rovnako ako click events
+        setTimeout(() => {
+            $(document).on(`keydown.switch-${type}`, function (e) {
+                if (e.key === 'Escape' && $root.hasClass('show-options')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    log('ESC klávesa - zatváram iba dropdown, nie modálne okno');
+                    close();
+                }
+            });
+        }, 200);
 
         // Responzívne správanie - vyčisti overlay pri zmene na desktop
         let mobileMediaQuery = window.matchMedia('(max-width: 768px)');
