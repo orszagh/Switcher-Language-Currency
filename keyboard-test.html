@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test klávesovej navigácie - Language & Currency Switcher</title>
+    <link rel="stylesheet" href="switcher-lang-currency-orso.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .test-info {
+            background: #e8f4fd;
+            border: 1px solid #0066cc;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .test-controls {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>Test klávesovej navigácie</h1>
+        <p><strong>Problém:</strong> Dropdown sa hneď po otvorení cez klávesnicu zavrie.</p>
+        <p><strong>Riešenie:</strong> Pridané oneskorenie a lepšie event handling pre keyboard eventy.</p>
+        
+        <h3>Testovanie:</h3>
+        <ol>
+            <li><strong>Tab</strong> - prejdi na Language switcher</li>
+            <li><strong>Enter alebo Space</strong> - otvor dropdown (mal by zostať otvorený!)</li>
+            <li><strong>ArrowDown/ArrowUp</strong> - naviguj medzi možnosťami</li>
+            <li><strong>Enter</strong> - vyber možnosť (pre jazyky = navigácia)</li>
+            <li><strong>Escape</strong> - zatvor dropdown</li>
+        </ol>
+    </div>
+
+    <div class="test-controls">
+        <h3>Prepínače:</h3>
+        <!-- Language switcher -->
+        <div class="switch lang" id="language-switcher">
+            <button class="current" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+                <!-- Bude vyplnené JavaScript-om -->
+            </button>
+            <ul class="options" role="listbox">
+                <!-- Bude vyplnené JavaScript-om -->
+            </ul>
+        </div>
+
+        <!-- Currency switcher -->
+        <div class="switch currency" id="currency-switcher">
+            <button class="current" role="combobox" aria-expanded="false" aria-haspopup="listbox">
+                <!-- Bude vyplnené JavaScript-om -->
+            </button>
+            <ul class="options" role="listbox">
+                <!-- Bude vyplnené JavaScript-om -->
+            </ul>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button onclick="LCDebug.testKeyboard()">Test klávesnice</button>
+            <button onclick="LCDebug.enableDebug()">Zapnúť debug</button>
+            <button onclick="LCDebug.disableDebug()">Vypnúť debug</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="switcher-lang-currency-orso.js"></script>
+    <script src="console-test.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Inicializácia prepínačov
+            LCSwitcher.init({
+                language: 'sk',
+                currency: 'eur',
+                languages: ['sk|Slovenčina', 'en|English', 'de|Deutsch'],
+                currencies: ['eur|EUR €', 'usd|USD $', 'czk|CZK Kč'],
+                languageLabel: 'Jazyk:',
+                currencyLabel: 'Mena:',
+                allowCurrencyChange: true,
+                languageChangeUrl: '/test?lang={CODE}',
+                debug: true
+            });
+
+            // Test helper pre keyboard
+            window.LCDebug.testKeyboard = function() {
+                console.log('=== TEST KLÁVESNICE ===');
+                console.log('1. Simulujem Tab na language switcher...');
+                $('#language-switcher .current').focus();
+                
+                setTimeout(() => {
+                    console.log('2. Simulujem Enter pre otvorenie dropdown...');
+                    const enterEvent = new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    $('#language-switcher .current')[0].dispatchEvent(enterEvent);
+                    
+                    setTimeout(() => {
+                        const isOpen = $('#language-switcher').hasClass('show-options');
+                        console.log('3. Dropdown je otvorený:', isOpen ? 'ÁNO ✓' : 'NIE ✗');
+                        
+                        if (isOpen) {
+                            console.log('✓ Test úspešný - dropdown zostal otvorený!');
+                        } else {
+                            console.log('✗ Test neúspešný - dropdown sa zatvoril');
+                        }
+                    }, 300);
+                }, 500);
+            };
+        });
+    </script>
+</body>
+</html>
